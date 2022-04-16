@@ -21,7 +21,7 @@ InfoServer::InfoServer()
 
 void InfoServer::add_tracker()
 {
-	response_info = response_info + std::to_string(port_no) + ":Default\n";
+	response_info = std::to_string(port_no) + ":Default\n";
 }
 
 void InfoServer::tick()

@@ -59,21 +59,15 @@ public:
 
 		// Mark that our device supports settings
 		settingsSupported = true;
-	}
 
-	~DeviceHandler() override
-	{
-	}
-
-	void onLoad() override
-	{
-		// Construct the device's settings here
 		load_settings(); // Load settings
 
 		// Construct the networking server
 		m_data_server = new UDPDeviceQuatServer(m_net_port);
-		m_info_server.set_port_no(m_data_server->get_port());
-		m_info_server.add_tracker();
+		m_info_server = new InfoServer();
+
+		m_info_server->set_port_no(m_data_server->get_port());
+		m_info_server->add_tracker();
 
 		// Start listening
 		try
@@ -86,6 +80,15 @@ public:
 			LOG(ERROR) << "Error message: " << e.what();
 			m_status_result = R_E_INIT_FAILED;
 		}
+	}
+
+	~DeviceHandler() override
+	{
+	}
+
+	void onLoad() override
+	{
+		// Construct the device's settings here
 
 		// Create elements
 		m_port_number_box = CreateNumberBox(m_net_port);
@@ -199,7 +202,7 @@ public:
 			}
 		}
 	}
-	
+
 	// OWO Tracker Settings' Hip Dislocation
 	Eigen::Vector3d m_global_offset{0, 0, 0},
 	                m_device_offset{0, 0, 0},
@@ -210,7 +213,7 @@ public:
 	                   m_local_rotation{1, 0, 0, 0};
 
 	// TODO NOT BACKED UP \/
-	
+
 	// OWO Position predict (should be ditched for the Kalman filter?)
 	bool m_should_predict_position_tracker_wise = false;
 	double m_position_prediction_strength_tracker_wise = 1.0;
@@ -230,10 +233,52 @@ public:
 
 	/* Internal, helper variables */
 	UDPDeviceQuatServer* m_data_server;
-	InfoServer m_info_server;
+	InfoServer* m_info_server;
 	PositionPredictor m_pos_predictor;
 
 	HRESULT m_status_result = R_E_DISCONNECTED;
+
+	std::unique_ptr<std::thread> m_update_server_thread;
+	void update_server_thread_worker()
+	{
+		while (initialized)
+		{
+			/* Update the discovery server here */
+			try
+			{
+				m_info_server->tick();
+			}
+			catch (std::system_error& e)
+			{
+				LOG(ERROR) << "OWO Device Error: Info server tick (heartbeat) failed!";
+				LOG(ERROR) << "Error message: " << e.what();
+			}
+
+			/* Update the data server here */
+			try
+			{
+				m_data_server->tick();
+			}
+			catch (std::system_error& e)
+			{
+				LOG(ERROR) << "OWO Device Error: Data listener tick (heartbeat) failed!";
+				LOG(ERROR) << "Error message: " << e.what();
+			}
+
+			if (!m_data_server->isDataAvailable())
+			{
+				skeletonTracked = false;
+				m_status_result =
+					m_data_server->isConnectionAlive()
+						? R_E_NO_DATA
+						: R_E_CONNECTION_DEAD;
+			}
+			else m_status_result = S_OK;
+
+			std::this_thread::sleep_for(
+				std::chrono::milliseconds(22));
+		}
+	}
 };
 
 /* Exported for dynamic linking */

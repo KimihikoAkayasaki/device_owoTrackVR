@@ -47,7 +47,14 @@ void DeviceHandler::initialize()
 
 	// Mark the device as initialized
 	if (m_status_result != R_E_INIT_FAILED)
-		initialized = true;
+	{
+		initialized = false; // Mark the device as NOT initialized (kill)
+		if (m_update_server_thread)
+			m_update_server_thread->join();
+
+		initialized = true; // Mark the device as initialized
+		m_update_server_thread.reset(new std::thread(&DeviceHandler::update_server_thread_worker, this));
+	}
 }
 
 void DeviceHandler::update()
@@ -57,30 +64,11 @@ void DeviceHandler::update()
 
 	if (isInitialized())
 	{
-		/* Update the data server here */
-		try
-		{
-			m_data_server->tick();
-		}
-		catch (std::system_error& e)
-		{
-			LOG(ERROR) << "OWO Device Error: Data listener tick (heartbeat) failed!";
-			LOG(ERROR) << "Error message: " << e.what();
-		}
-
-		if (!m_data_server->isDataAvailable())
-		{
-			skeletonTracked = false;
-			m_status_result =
-				m_data_server->isConnectionAlive()
-					? R_E_NO_DATA
-					: R_E_CONNECTION_DEAD;
-			return;
-		}
+		// Make sure that we're running correctly
+		if (m_status_result != S_OK)return;
 
 		// Mark that we see the user
 		skeletonTracked = true;
-		m_status_result = S_OK;
 
 		/* Prepare for the position calculations */
 
@@ -176,6 +164,10 @@ void DeviceHandler::update()
 void DeviceHandler::shutdown()
 {
 	// Turn your device off here
+
+	initialized = false; // Mark the device as NOT initialized (kill)
+	if (m_update_server_thread)
+		m_update_server_thread->join();
 }
 
 void DeviceHandler::signalJoint(uint32_t at)
