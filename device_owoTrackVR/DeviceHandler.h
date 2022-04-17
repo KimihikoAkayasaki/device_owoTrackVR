@@ -21,7 +21,7 @@
 #define R_E_NO_DATA 0x83010002   // No data received
 #define R_E_INIT_FAILED 0x83010003   // Init failed
 
-#define R_E_DISCONNECTED 0x83010005 // Disconnected (initial)
+#define E_NOT_STARTED 0x83010005 // Disconnected (initial)
 
 /* Eigen serialization */
 
@@ -236,9 +236,10 @@ public:
 	InfoServer* m_info_server;
 	PositionPredictor m_pos_predictor;
 
-	HRESULT m_status_result = R_E_DISCONNECTED;
+	HRESULT m_status_result = E_NOT_STARTED;
 
 	std::unique_ptr<std::thread> m_update_server_thread;
+
 	void update_server_thread_worker()
 	{
 		while (initialized)

@@ -30,8 +30,8 @@ std::string DeviceHandler::statusResultString(HRESULT stat)
 	case R_E_INIT_FAILED: return
 			"Listener startup fail!\nE_INIT_FAILED\nThe data server failed to start, check logs and port number.";
 
-	case R_E_DISCONNECTED: return
-			"Connection error!\nE_DISCONNECTED\nStart owoTrackVR app and try to connect it with this computer.";
+	case E_NOT_STARTED: return
+			"Connection error!\nE_NOT_STARTED\nPress the 'Reconnect' button to start the server's listener up.";
 
 	case S_FALSE:
 	default: return "Undefined: " + std::to_string(stat) +
@@ -98,9 +98,9 @@ void DeviceHandler::update()
 		// Acceleration is not used as of now
 		// double* acceleration = m_data_server->getAccel();
 
-		double const* p_remote_rotation = m_data_server->getRotationQuaternion();
+		const double* p_remote_rotation = m_data_server->getRotationQuaternion();
 
-		Quat p_remote_quaternion = Quat(
+		auto p_remote_quaternion = Quat(
 			p_remote_rotation[0], p_remote_rotation[1],
 			p_remote_rotation[2], p_remote_rotation[3]);
 
@@ -132,7 +132,7 @@ void DeviceHandler::update()
 		// Angular velocity is not used as of now
 		// double* gyro = m_data_server->getGyroscope();
 
-		Basis final_tracker_basis = Basis(p_remote_quaternion);
+		auto final_tracker_basis = Basis(p_remote_quaternion);
 
 		for (int i = 0; i < 3; i++)
 		{
@@ -143,7 +143,7 @@ void DeviceHandler::update()
 
 		if (!m_is_calibrating_forward && m_should_predict_position_tracker_wise)
 		{
-			Basis b = Basis(p_remote_quaternion);
+			auto b = Basis(p_remote_quaternion);
 			Vector3 result = m_pos_predictor.predict(*m_data_server, b) *
 				m_position_prediction_strength_tracker_wise;
 
