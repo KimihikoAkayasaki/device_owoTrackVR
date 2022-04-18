@@ -63,7 +63,7 @@ public:
 		load_settings(); // Load settings
 
 		// Construct the networking server
-		m_data_server = new UDPDeviceQuatServer(m_net_port);
+		m_data_server = new UDPDeviceQuatServer(&m_net_port);
 		m_info_server = new InfoServer();
 
 		m_info_server->set_port_no(m_data_server->get_port());
@@ -87,7 +87,7 @@ public:
 		}
 	}
 
-	~DeviceHandler() override
+	virtual ~DeviceHandler()
 	{
 	}
 
@@ -466,10 +466,14 @@ extern "C" __declspec(dllexport) void* TrackingDeviceBaseFactory(
 	// but only if interfaces are the same / up-to-date
 	if (0 == strcmp(ktvr::IK2API_Devices_Version, pVersionName))
 	{
-		static DeviceHandler TrackingHandler; // Create a new device handler -> KinectV2
+		static DeviceHandler* TrackingHandler = new DeviceHandler(); // Create a new device handler -> owoTrack
 
 		*pReturnCode = ktvr::K2InitError_None;
-		return &TrackingHandler;
+		return TrackingHandler;
+
+		// If you wanna know why of all things, owo is constructed by `new` as an exception workaround
+		// then you should read this: (it was causing a crash with its destructor, now the destructor isn't called)
+		// https://stackoverflow.com/questions/54253145/c-application-crashes-with-atexit-error#comment95332406_54253145
 	}
 
 	// Return code for initialization

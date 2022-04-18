@@ -35,7 +35,7 @@ void UDPDeviceQuatServer::send_bytebuffer(ByteBuffer& b){
 	free((void*)buff_c);
 }
 
-UDPDeviceQuatServer::UDPDeviceQuatServer(int portno_v) : NetworkedDeviceQuatServer() {
+UDPDeviceQuatServer::UDPDeviceQuatServer(uint32_t* portno_v) : NetworkedDeviceQuatServer() {
 	buffer = (char*)malloc(sizeof(char) * MAX_MSG_SIZE);
 
 	portno = portno_v;
@@ -109,5 +109,5 @@ void UDPDeviceQuatServer::buzz(float duration_s, float frequency, float amplitud
 }
 
 int UDPDeviceQuatServer::get_port(){
-	return portno;
+	return *portno;
 }

@@ -115,7 +115,7 @@ void DeviceHandler::calculatePose()
 	Vector3 offset_global = m_global_offset;
 	Vector3 offset_local_device = m_device_offset;
 	Vector3 offset_local_tracker = m_tracker_offset;
-	m_pose.first = getHMDPosition(); // Zero the position vector
+	m_pose.first = getHMDPositionCalibrated(); // Zero the position vector
 
 	Eigen::Matrix3f rotation = getHMDOrientationCalibrated().toRotationMatrix();
 	offset_basis.set(

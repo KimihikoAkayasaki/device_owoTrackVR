@@ -5,7 +5,7 @@
 
 class InfoServer {
 private:
-	const int INFO_PORT = 35903;
+	uint32_t INFO_PORT = 35903;
 	uint32_t port_no = 6969;
 
 	UDPSocket Socket;

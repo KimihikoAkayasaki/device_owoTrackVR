@@ -8,7 +8,7 @@ using namespace bb;
 
 class UDPDeviceQuatServer : public NetworkedDeviceQuatServer {
 private:
-	int portno;
+	uint32_t* portno; // Port number pointer
 	WSASession Session;
 	UDPSocket Socket;
 
@@ -30,7 +30,7 @@ private:
 	void send_bytebuffer(ByteBuffer& b);
 
 public:
-	UDPDeviceQuatServer(int portno_v);
+	UDPDeviceQuatServer(uint32_t* portno_v);
 
 	void startListening();
 	void tick();
