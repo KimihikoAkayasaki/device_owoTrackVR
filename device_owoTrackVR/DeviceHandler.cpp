@@ -48,12 +48,23 @@ void DeviceHandler::initialize()
 	// Mark the device as initialized
 	if (m_status_result != R_E_INIT_FAILED)
 	{
-		initialized = false; // Mark the device as NOT initialized (kill)
-		if (m_update_server_thread)
-			m_update_server_thread->join();
-
 		initialized = true; // Mark the device as initialized
-		m_update_server_thread.reset(new std::thread(&DeviceHandler::update_server_thread_worker, this));
+
+		if (!m_update_server_thread)
+			m_update_server_thread.reset(new std::thread(&DeviceHandler::update_server_thread_worker, this));
+
+		//if (!m_update_ui_thread)
+		//	m_update_ui_thread.reset(new std::thread(&DeviceHandler::update_ui_thread_worker, this));
+
+		m_is_calibrating_forward = false;
+		m_is_calibrating_down = false;
+
+		std::thread([&, this]
+		{
+			update_ui_thread_worker();
+			std::this_thread::sleep_for(std::chrono::seconds(1));
+			update_ui_thread_worker(); // Try again a bit later
+		}).detach();
 	}
 }
 
@@ -62,101 +73,19 @@ void DeviceHandler::update()
 	// Update joints' positions here
 	// Note: this is fired up every loop
 
-	if (isInitialized())
+	if (initialized)
 	{
 		// Make sure that we're running correctly
 		if (m_status_result != S_OK)return;
 
-		// Mark that we see the user
-		skeletonTracked = true;
-
-		/* Prepare for the position calculations */
-
-		Basis offset_basis;
-
-		Vector3 offset_global = m_global_offset;
-		Vector3 offset_local_device = m_device_offset;
-		Vector3 offset_local_tracker = m_tracker_offset;
-
-		std::pair<Eigen::Vector3f, Eigen::Quaternionf> pose{Eigen::Vector3f{0, 0, 0}, getHMDOrientation()};
-		Eigen::Matrix3f rotation = getHMDOrientation().toRotationMatrix();
-
-		offset_basis.set(
-			rotation(0, 0),
-			rotation(0, 1),
-			rotation(0, 2),
-			rotation(1, 0),
-			rotation(1, 1),
-			rotation(1, 2),
-			rotation(2, 0),
-			rotation(2, 1),
-			rotation(2, 2)
-		);
-
-		/* Parse and calculate the positions */
-
-		// Acceleration is not used as of now
-		// double* acceleration = m_data_server->getAccel();
-
-		const double* p_remote_rotation = m_data_server->getRotationQuaternion();
-
-		auto p_remote_quaternion = Quat(
-			p_remote_rotation[0], p_remote_rotation[1],
-			p_remote_rotation[2], p_remote_rotation[3]);
-
-		p_remote_quaternion =
-			Quat(Vector3(1, 0, 0), -Math_PI / 2.0) * p_remote_quaternion;
-
-		if (m_is_calibrating_forward)
-		{
-			m_global_rotation =
-				Quat(Vector3(0, (get_yaw(p_remote_quaternion)) -
-				             (get_yaw(offset_basis, Vector3(0, 0, -1))), 0)).to_eigen<double>();
-
-			offset_global = (offset_basis.xform(Vector3(0, 0, -1)) *
-				Vector3(1, 0, 1)).normalized() + Vector3(0, 0.2, 0);
-			offset_local_device = Vector3(0, 0, 0);
-			offset_local_tracker = Vector3(0, 0, 0);
-		}
-
-		p_remote_quaternion = Quat(m_global_rotation) * p_remote_quaternion;
-
-		if (m_is_calibrating_down)
-			m_local_rotation =
-			(Quat(p_remote_quaternion.inverse().get_euler_yxz()) *
-				Quat(Vector3(0, 1, 0), -getHMDOrientationYaw())).to_eigen<double>();
-
-		p_remote_quaternion = p_remote_quaternion * Quat(m_local_rotation);
-		pose.second = p_remote_quaternion.to_eigen<float>();
-
-		// Angular velocity is not used as of now
-		// double* gyro = m_data_server->getGyroscope();
-
-		auto final_tracker_basis = Basis(p_remote_quaternion);
-
-		for (int i = 0; i < 3; i++)
-		{
-			pose.first(i) += offset_global.get_axis(i);
-			pose.first(i) += offset_basis.xform(offset_local_device).get_axis(i);
-			pose.first(i) += final_tracker_basis.xform(offset_local_tracker).get_axis(i);
-		}
-
-		if (!m_is_calibrating_forward && m_should_predict_position_tracker_wise)
-		{
-			auto b = Basis(p_remote_quaternion);
-			Vector3 result = m_pos_predictor.predict(*m_data_server, b) *
-				m_position_prediction_strength_tracker_wise;
-
-			pose.first(0) += result.x;
-			pose.first(1) += result.y;
-			pose.first(2) += result.z;
-		}
+		// Note: All positions and orientations
+		// are already calculated in the server thread
 
 		/* Send the positions to the host */
 
 		trackedJoints.at(0).update(
-			pose.first,
-			pose.second,
+			m_pose.first,
+			m_pose.second,
 			ktvr::State_Tracked);
 	}
 }
@@ -165,12 +94,99 @@ void DeviceHandler::shutdown()
 {
 	// Turn your device off here
 
-	initialized = false; // Mark the device as NOT initialized (kill)
-	if (m_update_server_thread)
-		m_update_server_thread->join();
+	initialized = false;
+	save_settings(); // Back everything up
 }
 
 void DeviceHandler::signalJoint(uint32_t at)
 {
 	m_data_server->buzz(0.7, 100.0, 0.5);
+}
+
+void DeviceHandler::calculatePose()
+{
+	// Mark that we see the user
+	skeletonTracked = true;
+
+	/* Prepare for the position calculations */
+
+	Basis offset_basis;
+
+	Vector3 offset_global = m_global_offset;
+	Vector3 offset_local_device = m_device_offset;
+	Vector3 offset_local_tracker = m_tracker_offset;
+	m_pose.first = getHMDPosition(); // Zero the position vector
+
+	Eigen::Matrix3f rotation = getHMDOrientationCalibrated().toRotationMatrix();
+	offset_basis.set(
+		rotation(0, 0),
+		rotation(0, 1),
+		rotation(0, 2),
+		rotation(1, 0),
+		rotation(1, 1),
+		rotation(1, 2),
+		rotation(2, 0),
+		rotation(2, 1),
+		rotation(2, 2)
+	);
+
+	/* Parse and calculate the positions */
+
+	// Acceleration is not used as of now
+	// double* acceleration = m_data_server->getAccel();
+
+	const double* p_remote_rotation = m_data_server->getRotationQuaternion();
+
+	auto p_remote_quaternion = Quat(
+		p_remote_rotation[0], p_remote_rotation[1],
+		p_remote_rotation[2], p_remote_rotation[3]);
+
+	p_remote_quaternion =
+		Quat(Vector3(1, 0, 0), -Math_PI / 2.0) * p_remote_quaternion;
+
+
+	if (m_is_calibrating_forward)
+	{
+		m_global_rotation =
+			Quat(Vector3(0, (get_yaw(p_remote_quaternion)) -
+				(get_yaw(offset_basis, Vector3(0, 0, -1))), 0)).to_eigen<double>();
+
+		offset_global = (offset_basis.xform(Vector3(0, 0, -1)) *
+			Vector3(1, 0, 1)).normalized() + Vector3(0, 0.2, 0);
+		offset_local_device = Vector3(0, 0, 0);
+		offset_local_tracker = Vector3(0, 0, 0);
+	}
+
+	p_remote_quaternion = Quat(m_global_rotation) * p_remote_quaternion;
+
+	if (m_is_calibrating_down)
+		m_local_rotation =
+		(Quat(p_remote_quaternion.inverse().get_euler_yxz()) *
+			Quat(Vector3(0, 1, 0), -getHMDOrientationYawCalibrated())).to_eigen<double>();
+
+	p_remote_quaternion = p_remote_quaternion * Quat(m_local_rotation);
+	m_pose.second = p_remote_quaternion.to_eigen<float>();
+
+	// Angular velocity is not used as of now
+	// double* gyro = m_data_server->getGyroscope();
+
+	auto final_tracker_basis = Basis(p_remote_quaternion);
+
+	for (int i = 0; i < 3; i++)
+	{
+		m_pose.first(i) += offset_global.get_axis(i);
+		m_pose.first(i) += offset_basis.xform(offset_local_device).get_axis(i);
+		m_pose.first(i) += final_tracker_basis.xform(offset_local_tracker).get_axis(i);
+	}
+
+	if (!m_is_calibrating_forward && m_should_predict_position_tracker_wise)
+	{
+		auto b = Basis(p_remote_quaternion);
+		Vector3 result = m_pos_predictor.predict(*m_data_server, b) *
+			m_position_prediction_strength_tracker_wise;
+
+		m_pose.first(0) += result.x;
+		m_pose.first(1) += result.y;
+		m_pose.first(2) += result.z;
+	}
 }
