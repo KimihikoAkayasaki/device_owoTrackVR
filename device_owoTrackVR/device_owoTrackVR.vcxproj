@@ -136,7 +136,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)external\vendor\owo;$(SolutionDir)external\vendor\KinectToVR;$(SolutionDir)external\cereal\include;$(SolutionDir)external\eigen;$(SolutionDir)external\gflags\vcbuild\include;$(SolutionDir)external\glog\src;$(SolutionDir)external\glog\vcbuild;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)external\vendor\owo;$(SolutionDir)external\vendor\Amethyst;$(SolutionDir)external\cereal\include;$(SolutionDir)external\eigen;$(SolutionDir)external\gflags\vcbuild\include;$(SolutionDir)external\glog\src;$(SolutionDir)external\glog\vcbuild;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -166,7 +166,7 @@ xcopy /y /d "$(SolutionDir)external\glog\vcbuild\$(Configuration)\glog*.dll" "$(
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)external\vendor\owo;$(SolutionDir)external\vendor\KinectToVR;$(SolutionDir)external\cereal\include;$(SolutionDir)external\eigen;$(SolutionDir)external\gflags\vcbuild\include;$(SolutionDir)external\glog\src;$(SolutionDir)external\glog\vcbuild;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)external\vendor\owo;$(SolutionDir)external\vendor\Amethyst;$(SolutionDir)external\cereal\include;$(SolutionDir)external\eigen;$(SolutionDir)external\gflags\vcbuild\include;$(SolutionDir)external\glog\src;$(SolutionDir)external\glog\vcbuild;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
