@@ -21,7 +21,7 @@
 #define R_E_NO_DATA 0x83010002   // No data received
 #define R_E_INIT_FAILED 0x83010003   // Init failed
 
-#define E_NOT_STARTED 0x83010005 // Disconnected (initial)
+#define R_E_NOT_STARTED 0x83010005 // Disconnected (initial)
 
 /* Eigen serialization */
 
@@ -61,30 +61,6 @@ public:
 		settingsSupported = true;
 
 		load_settings(); // Load settings
-
-		// Construct the networking server
-		m_data_server = new UDPDeviceQuatServer(&m_net_port);
-		m_info_server = new InfoServer();
-
-		m_info_server->set_port_no(m_data_server->get_port());
-		m_info_server->add_tracker();
-
-		// Start listening
-		try
-		{
-			m_data_server->startListening();
-		}
-		catch (std::system_error& e)
-		{
-			LOG(ERROR) << "OWO Device Error: Failed to start the data listener up!";
-			LOG(ERROR) << "Error message: " << e.what();
-			m_status_result = R_E_INIT_FAILED;
-
-			m_message_text_block->Text("Server has failed to start up!");
-			m_main_progress_bar->Progress(100);
-			m_main_progress_bar->ShowError(true);
-			m_main_progress_bar->ShowPaused(false);
-		}
 	}
 
 	virtual ~DeviceHandler()
@@ -104,7 +80,7 @@ public:
 		m_message_text_block = CreateTextBlock("Please start the server first!");
 		m_main_progress_bar = CreateProgressBar();
 
-		m_hip_height_number_box = CreateNumberBox(-(m_tracker_offset.y() * 100.0));
+		//m_hip_height_number_box = CreateNumberBox(-(m_tracker_offset.y() * 100.0));
 
 		m_calibrate_forward_button = CreateButton("Calibrate Forward");
 		m_calibrate_down_button = CreateButton("Calibrate Down");
@@ -259,6 +235,14 @@ public:
 			m_ip_text_block->Text(_addr_str + " ]");
 		}).detach();
 
+		// Hide post-init ui elements
+		m_ip_text_block->Visibility(false);
+		m_port_text_block->Visibility(false);
+		
+		m_calibrate_forward_button->Visibility(false);
+		m_calibrate_down_button->Visibility(false);
+
+		// Mark everything as set up
 		hasBeenLoaded = true;
 	}
 
@@ -370,7 +354,7 @@ public:
 	InfoServer* m_info_server;
 	PositionPredictor m_pos_predictor;
 
-	HRESULT m_status_result = E_NOT_STARTED;
+	HRESULT m_status_result = R_E_NOT_STARTED;
 
 	void calculatePose(); // Implemented in .cpp
 	std::pair<Eigen::Vector3f, Eigen::Quaternionf> m_pose
@@ -407,7 +391,7 @@ public:
 		}
 	}
 
-	void update_server_thread_worker()
+	[[noreturn]] void update_server_thread_worker()
 	{
 		while (true)
 		{

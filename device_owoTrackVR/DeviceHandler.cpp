@@ -30,7 +30,7 @@ std::string DeviceHandler::statusResultString(HRESULT stat)
 	case R_E_INIT_FAILED: return
 			"Listener startup fail!\nE_INIT_FAILED\nThe data server failed to start, check logs and port number.";
 
-	case E_NOT_STARTED: return
+	case R_E_NOT_STARTED: return
 			"Connection error!\nE_NOT_STARTED\nPress the 'Reconnect' button to start the server's listener up.";
 
 	case S_FALSE:
@@ -44,6 +44,42 @@ void DeviceHandler::initialize()
 	// Initialize your device here
 	trackedJoints.clear();
 	trackedJoints.push_back(ktvr::K2TrackedJoint("Default"));
+
+	// Optionally initialize the server
+	// (Warning: this can be done only once)
+	if (m_status_result == R_E_NOT_STARTED)
+	{
+		// Construct the networking server
+		m_data_server = new UDPDeviceQuatServer(&m_net_port);
+		m_info_server = new InfoServer();
+
+		m_info_server->set_port_no(m_data_server->get_port());
+		m_info_server->add_tracker();
+
+		// Start listening
+		try
+		{
+			m_data_server->startListening();
+		}
+		catch (std::system_error& e)
+		{
+			LOG(ERROR) << "OWO Device Error: Failed to start the data listener up!";
+			LOG(ERROR) << "Error message: " << e.what();
+			m_status_result = R_E_INIT_FAILED;
+
+			m_message_text_block->Text("Server has failed to start up!");
+			m_main_progress_bar->Progress(100);
+			m_main_progress_bar->ShowError(true);
+			m_main_progress_bar->ShowPaused(false);
+		}
+
+		// Show the hidden ui elements
+		m_ip_text_block->Visibility(true);
+		m_port_text_block->Visibility(true);
+
+		m_calibrate_forward_button->Visibility(true);
+		m_calibrate_down_button->Visibility(true);
+	}
 
 	// Mark the device as initialized
 	if (m_status_result != R_E_INIT_FAILED)
@@ -149,7 +185,7 @@ void DeviceHandler::calculatePose()
 	{
 		m_global_rotation =
 			Quat(Vector3(0, (get_yaw(p_remote_quaternion)) -
-				(get_yaw(offset_basis, Vector3(0, 0, -1))), 0)).to_eigen<double>();
+			             (get_yaw(offset_basis, Vector3(0, 0, -1))), 0)).to_eigen<double>();
 
 		offset_global = (offset_basis.xform(Vector3(0, 0, -1)) *
 			Vector3(1, 0, 1)).normalized() + Vector3(0, 0.2, 0);
