@@ -12,30 +12,30 @@ HRESULT DeviceHandler::getStatusResult()
 	return m_status_result;
 }
 
-std::string DeviceHandler::statusResultString(HRESULT stat)
+std::wstring DeviceHandler::statusResultWString(HRESULT stat)
 {
 	// Parse your device's status into some nice text here,
 	// it has to be formatted like [HEADER]\n[TYPE]\n[MESSAGE]
 
 	switch (stat)
 	{
-	case S_OK: return "Success!\nS_OK\nEverything's good!";
+	case S_OK: return L"Success!\nS_OK\nEverything's good!";
 
 	case R_E_CONNECTION_DEAD: return
-			"Connection error!\nE_CONNECTION_DEAD\nCheck if owoTrackVR app is running, working and connected.";
+			L"Connection error!\nE_CONNECTION_DEAD\nCheck if owoTrackVR app is running, working and connected.";
 
 	case R_E_NO_DATA: return
-			"Connection error!\nE_NO_DATA\nCheck if owoTrackVR app is running, working and connected.";
+			L"Connection error!\nE_NO_DATA\nCheck if owoTrackVR app is running, working and connected.";
 
 	case R_E_INIT_FAILED: return
-			"Listener startup fail!\nE_INIT_FAILED\nThe data server failed to start, check logs and port number.";
+			L"Listener startup fail!\nE_INIT_FAILED\nThe data server failed to start, check logs and port number.";
 
 	case R_E_NOT_STARTED: return
-			"Connection error!\nE_NOT_STARTED\nPress the 'Reconnect' button to start the server's listener up.";
+			L"Connection error!\nE_NOT_STARTED\nPress the 'Reconnect' button to start the server's listener up.";
 
 	case S_FALSE:
-	default: return "Undefined: " + std::to_string(stat) +
-			"\nE_UNDEFINED\nSomething weird has happened, though we can't tell what.";
+	default: return L"Undefined: " + std::to_wstring(stat) +
+			L"\nE_UNDEFINED\nSomething weird has happened, though we can't tell what.";
 	}
 }
 
@@ -67,7 +67,7 @@ void DeviceHandler::initialize()
 			LOG(ERROR) << "Error message: " << e.what();
 			m_status_result = R_E_INIT_FAILED;
 
-			m_message_text_block->Text("Server has failed to start up!");
+			m_message_text_block->Text(L"Server has failed to start up!");
 			m_main_progress_bar->Progress(100);
 			m_main_progress_bar->ShowError(true);
 			m_main_progress_bar->ShowPaused(false);

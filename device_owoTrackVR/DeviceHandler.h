@@ -74,16 +74,16 @@ public:
 		// Construct the device's settings here
 
 		// Create elements
-		m_ip_text_block = CreateTextBlock("Your Local IP: [ 127.0.0.1 ]");
-		m_port_text_block = CreateTextBlock("Connection Port: [ " + std::to_string(m_net_port) + " ]");
+		m_ip_text_block = CreateTextBlock(L"Your Local IP: [ 127.0.0.1 ]");
+		m_port_text_block = CreateTextBlock(L"Connection Port: [ " + std::to_wstring(m_net_port) + L" ]");
 
-		m_message_text_block = CreateTextBlock("Please start the server first!");
+		m_message_text_block = CreateTextBlock(L"Please start the server first!");
 		m_main_progress_bar = CreateProgressBar();
 
 		//m_hip_height_number_box = CreateNumberBox(-(m_tracker_offset.y() * 100.0));
 
-		m_calibrate_forward_button = CreateButton("Calibrate Forward");
-		m_calibrate_down_button = CreateButton("Calibrate Down");
+		m_calibrate_forward_button = CreateButton(L"Calibrate Forward");
+		m_calibrate_down_button = CreateButton(L"Calibrate Down");
 
 		// Set up elements
 		m_main_progress_bar->Width(306);
@@ -105,7 +105,7 @@ public:
 
 		// Append the elements : Spacer
 		layoutRoot->AppendSingleElement(
-			CreateTextBlock(" ")); // A spacer
+			CreateTextBlock(L" ")); // A spacer
 
 		layoutRoot->AppendSingleElement(
 			m_message_text_block,
@@ -134,7 +134,7 @@ public:
 			{
 				if (!initialized)return;
 
-				m_message_text_block->Text("Point your phone forward, screen up...");
+				m_message_text_block->Text(L"Point your phone forward, screen up...");
 				m_main_progress_bar->Progress(100);
 				m_main_progress_bar->ShowPaused(true);
 
@@ -148,7 +148,7 @@ public:
 				m_main_progress_bar->ShowPaused(false);
 				m_main_progress_bar->Progress(-1);
 
-				m_message_text_block->Text("Please stay like that a bit...");
+				m_message_text_block->Text(L"Please stay like that a bit...");
 				std::this_thread::sleep_for(std::chrono::seconds(4));
 
 				m_is_calibrating_forward = false;
@@ -165,7 +165,7 @@ public:
 			{
 				if (!initialized)return;
 
-				m_message_text_block->Text("Mount your phone in its place now...");
+				m_message_text_block->Text(L"Mount your phone in its place now...");
 				m_main_progress_bar->Progress(100);
 				m_main_progress_bar->ShowPaused(true);
 
@@ -179,7 +179,7 @@ public:
 				m_main_progress_bar->ShowPaused(false);
 				m_main_progress_bar->Progress(-1);
 
-				m_message_text_block->Text("Please stay like that a bit...");
+				m_message_text_block->Text(L"Please stay like that a bit...");
 				std::this_thread::sleep_for(std::chrono::seconds(4));
 
 				m_is_calibrating_down = false;
@@ -232,7 +232,7 @@ public:
 
 			_addr_str = _addr_str.substr(
 				0, _addr_str.rfind(","));
-			m_ip_text_block->Text(_addr_str + " ]");
+			m_ip_text_block->Text(StringToWString(_addr_str + " ]"));
 		}).detach();
 
 		// Hide post-init ui elements
@@ -247,7 +247,7 @@ public:
 	}
 
 	HRESULT getStatusResult() override;
-	std::string statusResultString(HRESULT stat) override;
+	std::wstring statusResultWString(HRESULT stat) override;
 
 	void initialize() override;
 	void update() override;
@@ -372,7 +372,7 @@ public:
 		{
 			if (m_status_result == S_OK)
 			{
-				m_message_text_block->Text("owoTrackVR Running OK");
+				m_message_text_block->Text(L"owoTrackVR Running OK");
 				m_main_progress_bar->Progress(100);
 				m_main_progress_bar->ShowPaused(false);
 
@@ -381,7 +381,7 @@ public:
 			}
 			else
 			{
-				m_message_text_block->Text("Please connect your phone!");
+				m_message_text_block->Text(L"Please connect your phone!");
 				m_main_progress_bar->Progress(100);
 				m_main_progress_bar->ShowPaused(true);
 
