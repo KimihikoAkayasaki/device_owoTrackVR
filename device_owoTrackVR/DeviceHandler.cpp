@@ -7,6 +7,8 @@
 
 #include <basis.h>
 
+#include "LocalizedStatuses.h"
+
 HRESULT DeviceHandler::getStatusResult()
 {
 	return m_status_result;
@@ -19,19 +21,15 @@ std::wstring DeviceHandler::statusResultWString(HRESULT stat)
 
 	switch (stat)
 	{
-	case S_OK: return L"Success!\nS_OK\nEverything's good!";
+	case S_OK: return GetLocalizedStatusWStringAutomatic(status_ok_map);
 
-	case R_E_CONNECTION_DEAD: return
-			L"Connection error!\nE_CONNECTION_DEAD\nCheck if owoTrackVR app is running, working and connected.";
+	case R_E_CONNECTION_DEAD: return GetLocalizedStatusWStringAutomatic(status_dead_map);
 
-	case R_E_NO_DATA: return
-			L"Connection error!\nE_NO_DATA\nCheck if owoTrackVR app is running, working and connected.";
+	case R_E_NO_DATA: return GetLocalizedStatusWStringAutomatic(status_no_data_map);
 
-	case R_E_INIT_FAILED: return
-			L"Listener startup fail!\nE_INIT_FAILED\nThe data server failed to start, check logs and port number.";
+	case R_E_INIT_FAILED: return GetLocalizedStatusWStringAutomatic(status_init_fail_map);
 
-	case R_E_NOT_STARTED: return
-			L"Connection error!\nE_NOT_STARTED\nPress the 'Reconnect' button to start the server's listener up.";
+	case R_E_NOT_STARTED: return GetLocalizedStatusWStringAutomatic(status_not_started_map);
 
 	case S_FALSE:
 	default: return L"Undefined: " + std::to_wstring(stat) +

@@ -201,6 +201,7 @@ xcopy /y /d "$(SolutionDir)external\glog\vcbuild\$(Configuration)\glog*.dll" "$(
     <ClInclude Include="..\external\vendor\owo\vector3.h" />
     <ClInclude Include="DeviceHandler.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="LocalizedStatuses.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>

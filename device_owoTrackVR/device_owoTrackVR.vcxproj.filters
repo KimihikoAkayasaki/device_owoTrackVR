@@ -66,6 +66,9 @@
     <ClInclude Include="..\external\vendor\owo\vector3.h">
       <Filter>Vendor\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="LocalizedStatuses.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
