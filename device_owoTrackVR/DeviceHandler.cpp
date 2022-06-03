@@ -11,6 +11,7 @@
 
 HRESULT DeviceHandler::getStatusResult()
 {
+	update_ui_thread_worker();
 	return m_status_result;
 }
 
@@ -65,18 +66,22 @@ void DeviceHandler::initialize()
 			LOG(ERROR) << "Error message: " << e.what();
 			m_status_result = R_E_INIT_FAILED;
 
-			m_message_text_block->Text(L"Server has failed to start up!");
-			m_main_progress_bar->Progress(100);
-			m_main_progress_bar->ShowError(true);
-			m_main_progress_bar->ShowPaused(false);
+			if (hasBeenLoaded) {
+				m_message_text_block->Text(L"Server has failed to start up!");
+				m_main_progress_bar->Progress(100);
+				m_main_progress_bar->ShowError(true);
+				m_main_progress_bar->ShowPaused(false);
+			}
 		}
 
 		// Show the hidden ui elements
-		m_ip_text_block->Visibility(true);
-		m_port_text_block->Visibility(true);
+		if (hasBeenLoaded) {
+			m_ip_text_block->Visibility(true);
+			m_port_text_block->Visibility(true);
 
-		m_calibrate_forward_button->Visibility(true);
-		m_calibrate_down_button->Visibility(true);
+			m_calibrate_forward_button->Visibility(true);
+			m_calibrate_down_button->Visibility(true);
+		}
 	}
 
 	// Mark the device as initialized
