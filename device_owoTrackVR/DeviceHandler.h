@@ -124,6 +124,16 @@ public:
 			m_calibrate_forward_button,
 			m_calibrate_down_button);
 
+		// Hide post-init ui elements
+		m_ip_text_block->Visibility(false);
+		m_port_text_block->Visibility(false);
+
+		m_calibrate_forward_button->Visibility(false);
+		m_calibrate_down_button->Visibility(false);
+
+		// Mark everything as set up
+		hasBeenLoaded = true;
+
 		// Set up particular handlers
 
 		// "Full Calibration"
@@ -234,16 +244,6 @@ public:
 				0, _addr_str.rfind(","));
 			m_ip_text_block->Text(StringToWString(_addr_str + " ]"));
 		}).detach();
-
-		// Hide post-init ui elements
-		m_ip_text_block->Visibility(false);
-		m_port_text_block->Visibility(false);
-		
-		m_calibrate_forward_button->Visibility(false);
-		m_calibrate_down_button->Visibility(false);
-
-		// Mark everything as set up
-		hasBeenLoaded = true;
 	}
 
 	HRESULT getStatusResult() override;
