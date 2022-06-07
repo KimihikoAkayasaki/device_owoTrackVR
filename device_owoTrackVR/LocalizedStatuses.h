@@ -18,6 +18,10 @@ inline std::map<std::wstring, std::wstring> status_ok_map
 	{
 		L"fr-FR",
 		L"Succès!\nS_OK\nTout fonctionne!"
+	},
+	{
+		L"ru-RU",
+		L"Успешно!\nS_OK\nВсе работает!"
 	}
 };
 
@@ -34,6 +38,10 @@ inline std::map<std::wstring, std::wstring> status_dead_map
 	{
 		L"fr-FR",
 		L"Erreur de connexion!\nE_CONNECTION_DEAD\nVérifiez si l'app owoTrackVR fonctionne et est connectée."
+	},
+	{
+		L"ru-RU",
+		L"Ошибка подключения!\nE_CONNECTION_DEAD\nУбедитесь, что приложение owoTrackVR работает и подключено."
 	}
 };
 
@@ -50,6 +58,10 @@ inline std::map<std::wstring, std::wstring> status_no_data_map
 	{
 		L"fr-FR",
 		L"Erreur de connexion!\nE_NO_DATA\nVérifiez si l'app owoTrackVR fonctionne et est connectée."
+	},
+	{
+		L"ru-RU",
+		L"Ошибка подключения!\nE_NO_DATA\nУбедитесь, что приложение owoTrackVR работает и подключено."
 	}
 };
 
@@ -66,6 +78,10 @@ inline std::map<std::wstring, std::wstring> status_init_fail_map
 	{
 		L"fr-FR",
 		L"Erreur du serveur!\nE_INIT_FAILED\nLe serveur n'a pas démarré correctement. Vérifiez les logs et le port."
+	},
+	{
+		L"ru-RU",
+		L"Ошибка запуска сервера!\nE_INIT_FAILED\nНе удалось запустить сервер, проверьте журнал событий и номер порта."
 	}
 };
 
@@ -82,6 +98,10 @@ inline std::map<std::wstring, std::wstring> status_not_started_map
 	{
 		L"fr-FR",
 		L"Erreur de connexion!\nE_NOT_STARTED\nCliquez sur 'Actualiser' pour démarrer le serveur owoTrack."
+	},
+	{
+		L"ru-RU",
+		L"Ошибка подключения!\nE_NOT_STARTED\nНажмите кнопку \"Обновить\" для запуска сервера."
 	}
 };
 
