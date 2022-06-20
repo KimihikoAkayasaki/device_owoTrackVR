@@ -20,30 +20,23 @@ jobs:
           Import-Module "$env:ProgramData\Chocolatey\helpers\chocolateyProfile.psm1"
           Update-SessionEnvironment
 
-      - name: Setup Cereal, Eigen, GLog & GFlags
+      - name: GLog & GFlags
         run: |
           Invoke-WebRequest -Uri 'https://github.com/microsoft/vswhere/releases/latest/download/vswhere.exe' -OutFile './vswhere.exe'
           $msbuild = "$("$(.\vswhere.exe -legacy -prerelease -products * -format json | Select-String -Pattern "2022" | `
               Select-String -Pattern "Studio" | Select-Object -First 1 | Select-String -Pattern "installationPath")" `
               -replace('"installationPath": "','') -replace('",',''))".Trim() + "\\MSBuild\\Current\\Bin\\MSBuild.exe"
 
-          git clone https://github.com/USCiLab/cereal ./external/cereal
+          git submodule update --init
 
-          git clone https://gitlab.com/libeigen/eigen ./external/eigen
-          cd ./external/eigen
-          git reset --hard 1fd5ce1002a6f30e1169b529b291216a18be2f7e
-          cd ../..
-
-          git clone https://github.com/google/glog.git ./external/glog
           cd ./external/glog
-          mkdir vcbuild; cd ./vcbuild
+          mkdir builds; cd ./builds
           &"C:/Program Files/CMake/bin/cmake.exe" .. -DBUILD_SHARED_LIBS=ON
           &"$msbuild" glog.vcxproj "/p:Configuration=Release;Platform=x64"
           cd ../../..
 
-          git clone https://github.com/gflags/gflags.git ./external/gflags
           cd ./external/gflags
-          mkdir vcbuild; cd ./vcbuild
+          mkdir builds; cd ./builds
           &"C:/Program Files/CMake/bin/cmake.exe" .. -DBUILD_SHARED_LIBS=ON
           &"$msbuild" gflags.vcxproj "/p:Configuration=Release;Platform=x64"
 

@@ -8,44 +8,31 @@ Follow these steps:
 - [Install tools for the Windows App development](https://docs.microsoft.com/en-us/windows/apps/windows-app-sdk/set-up-your-development-environment?tabs=vs-2022-17-1-a%2Cvs-2022-17-1-b).<br>
   You'll have to install Visual Studio 2022 or its Build Tools.
 
-- Clone `cereal` & `Eigen3` to `external/` and set up `GLog` & `GFlags`<br>
-  (For this step you must have cmake installed and visible in PATH)<br>
+- Set up external dependencies
   ```powershell
-  # Clone cereal
-  > git clone https://github.com/USCiLab/cereal ./external/cereal
+  git submodule update --init
+  ```
 
-  # Clone and setup Eigen3
-  > git clone https://gitlab.com/libeigen/eigen ./external/eigen
-  # Reset Eigen to the latest OK state
-  > cd ./external/eigen
-  > git reset --hard 1fd5ce1002a6f30e1169b529b291216a18be2f7e
-  # Go back
-  > cd ../..
-  
-  # Clone and setup GLog
-  > git clone https://github.com/google/glog.git ./external/glog
-  # Reset GLog to the latest OK state and build it
+- Set up `GLog` & `GFlags` (For this step you must have cmake installed and visible in PATH)<br>
+  ```powershell
+  # Build GLog
   > cd ./external/glog
-  > git reset --hard f8c8e99fdfb998c2ba96cfb470decccf418f0b30
-  > mkdir vcbuild; cd ./vcbuild
+  > mkdir builds; cd ./builds
   > cmake .. -DBUILD_SHARED_LIBS=ON
   > &"$msbuild" glog.vcxproj "/p:Configuration=Release;Platform=x64"
   # Go back
   > cd ../../..
 
-  # Clone and setup GFlags
-  > git clone https://github.com/gflags/gflags.git ./external/gflags
-  # Reset GFlags to the latest OK state and build it
+  # Build GFlags
   > cd ./external/gflags
-  > git reset --hard 827c769e5fc98e0f2a34c47cef953cc6328abced
-  > mkdir vcbuild; cd ./vcbuild
+  > mkdir builds; cd ./builds
   > cmake .. -DBUILD_SHARED_LIBS=ON
   > &"$msbuild" gflags.vcxproj "/p:Configuration=Release;Platform=x64"
   # Go back
   > cd ../../..
   ```
 
-- Build Samples:<br>
+- Build the device:<br>
   ```powershell
   # Download the vswhere tool to find msbuild without additional interactions
   > Invoke-WebRequest -Uri 'https://github.com/microsoft/vswhere/releases/latest/download/vswhere.exe' -OutFile './vswhere.exe'
