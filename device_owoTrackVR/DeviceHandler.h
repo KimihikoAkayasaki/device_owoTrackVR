@@ -9,8 +9,15 @@
 #include <cereal/types/unordered_map.hpp>
 #include <cereal/types/memory.hpp>
 #include <cereal/archives/xml.hpp>
+
 #include <fstream>
 #include <thread>
+#include <WinSock2.h>
+#include <iphlpapi.h>
+#include <WS2tcpip.h>
+
+#pragma comment(lib, "ws2_32.lib")
+#pragma comment(lib, "iphlpapi.lib")
 
 #include <InfoServer.h>
 #include <PositionPredictor.h>
@@ -74,14 +81,14 @@ public:
 		// Construct the device's settings here
 
 		// Create elements
-		m_ip_text_block = CreateTextBlock(L"Your Local IP: [ 127.0.0.1 ]");
+		m_ip_text_block = CreateTextBlock(L"Your Local IP: 127.0.0.1");
 		m_port_text_block = CreateTextBlock(L"Connection Port: " + std::to_wstring(m_net_port) + L"\n");
 
 		m_message_text_block = CreateTextBlock(L"Please start the server first!");
 
 		m_calibration_text_block = CreateTextBlock(L"");
 		m_calibration_text_block->Visibility(false);
-		
+
 		m_calibrate_forward_button = CreateButton(L"Calibrate Forward");
 		m_calibrate_down_button = CreateButton(L"Calibrate Down");
 
@@ -199,37 +206,67 @@ public:
 		// Grab & push local ip addresses to the UI
 		std::thread([&]
 		{
-			char ac[80];
-			if (gethostname(ac, sizeof(ac)) == SOCKET_ERROR)
-			{
-				LOG(ERROR) << "OWO Device Error: " << WSAGetLastError() <<
-					" when getting local host name";
-				return;
-			}
-			LOG(INFO) << "OWO Device: My host name is " << ac;
+			DWORD size;
+			std::vector<std::string> _addr_vector;
 
-			hostent* phe = gethostbyname(ac);
-			if (phe == nullptr)
+			if (GetAdaptersAddresses(
+					AF_INET, GAA_FLAG_INCLUDE_PREFIX,
+					nullptr, nullptr, &size)
+				!= ERROR_BUFFER_OVERFLOW)
 			{
-				LOG(ERROR) << "OWO Device Error: Bad host lookup";
+				LOG(ERROR) << "OWO Device Error: ERROR_BUFFER_OVERFLOW when getting local host name";
 				return;
 			}
+
+			const auto adapter_addresses = static_cast<PIP_ADAPTER_ADDRESSES>(malloc(size));
+			if (GetAdaptersAddresses(
+					AF_INET, GAA_FLAG_INCLUDE_PREFIX,
+					nullptr, adapter_addresses, &size)
+				!= ERROR_SUCCESS)
+			{
+				LOG(ERROR) << "OWO Device Error: " << WSAGetLastError() << " when getting local host name";
+				free(adapter_addresses);
+				return;
+			}
+
+			for (auto aa = adapter_addresses; aa != nullptr; aa = aa->Next)
+			{
+				if (aa->OperStatus != IfOperStatusUp) continue;
+				if (std::wstring(aa->Description).find(L"Virtual") != std::wstring::npos) continue;
+
+				for (auto ua = aa->FirstUnicastAddress; ua != nullptr; ua = ua->Next)
+				{
+					char buf[BUFSIZ]{};
+					getnameinfo(ua->Address.lpSockaddr,
+					            ua->Address.iSockaddrLength,
+					            buf, sizeof(buf),
+					            nullptr, 0,
+					            NI_NUMERICHOST);
+
+					// If everything's right, push back to the vec
+					if (std::string(buf) != "127.0.0.1")
+						_addr_vector.push_back(buf);
+				}
+			}
+
+			free(adapter_addresses);
 
 			// Append to the UI
-			std::string _addr_str("Your Local IP: (One of) [ ");
-
-			for (int i = 0; phe->h_addr_list[i] != nullptr; ++i)
+			if (!_addr_vector.empty())
 			{
-				in_addr addr;
-				memcpy(&addr, phe->h_addr_list[i], sizeof(struct in_addr));
+				std::string _addr_str =
+					_addr_vector.size() > 1
+						? "Your Local IP: (One of) [ "
+						: "Your Local IP: ";
 
-				_addr_str.append(inet_ntoa(addr));
-				_addr_str.append(", ");
+				for(const auto& _address : _addr_vector)
+					_addr_str += _address + ", ";
+
+				_addr_str = _addr_str.substr(0, _addr_str.rfind(","));
+				if (_addr_vector.size() > 1)_addr_str += " ]"; // End array
+
+				m_ip_text_block->Text(StringToWString(_addr_str));
 			}
-
-			_addr_str = _addr_str.substr(
-				0, _addr_str.rfind(","));
-			m_ip_text_block->Text(StringToWString(_addr_str + " ]"));
 		}).detach();
 	}
 
@@ -396,6 +433,10 @@ public:
 
 	[[noreturn]] void update_server_thread_worker()
 	{
+		// How many retries have been made before marking
+		// the connection dead (assume max 60 retries or 1 second)
+		int32_t e_retries = 0;
+
 		while (true)
 		{
 			if (initialized)
@@ -424,11 +465,16 @@ public:
 
 				if (!m_data_server->isDataAvailable())
 				{
-					skeletonTracked = false;
-					m_status_result =
-						m_data_server->isConnectionAlive()
+					if (e_retries >= 60)
+					{
+						e_retries = 0; // Reset
+						skeletonTracked = false;
+						m_status_result =
+							m_data_server->isConnectionAlive()
 							? R_E_NO_DATA
 							: R_E_CONNECTION_DEAD;
+					}
+					else e_retries++;
 				}
 				else
 				{
