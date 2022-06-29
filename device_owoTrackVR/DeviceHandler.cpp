@@ -11,6 +11,16 @@
 
 HRESULT DeviceHandler::getStatusResult()
 {
+	// Show the post-init, hidden ui elements
+	if (hasBeenLoaded)
+	{
+		m_ip_text_block->Visibility(true);
+		m_port_text_block->Visibility(true);
+
+		m_calibrate_forward_button->Visibility(true);
+		m_calibrate_down_button->Visibility(true);
+	}
+
 	update_ui_thread_worker();
 	return m_status_result;
 }
@@ -66,21 +76,10 @@ void DeviceHandler::initialize()
 			LOG(ERROR) << "Error message: " << e.what();
 			m_status_result = R_E_INIT_FAILED;
 
-			if (hasBeenLoaded) {
+			if (hasBeenLoaded)
+			{
 				m_message_text_block->Text(L"Server has failed to start up!");
-				m_main_progress_bar->Progress(100);
-				m_main_progress_bar->ShowError(true);
-				m_main_progress_bar->ShowPaused(false);
 			}
-		}
-
-		// Show the hidden ui elements
-		if (hasBeenLoaded) {
-			m_ip_text_block->Visibility(true);
-			m_port_text_block->Visibility(true);
-
-			m_calibrate_forward_button->Visibility(true);
-			m_calibrate_down_button->Visibility(true);
 		}
 	}
 
@@ -91,7 +90,7 @@ void DeviceHandler::initialize()
 
 		if (!m_update_server_thread)
 			m_update_server_thread.reset(new std::thread(&DeviceHandler::update_server_thread_worker, this));
-		
+
 		m_is_calibrating_forward = false;
 		m_is_calibrating_down = false;
 
@@ -101,15 +100,6 @@ void DeviceHandler::initialize()
 			std::this_thread::sleep_for(std::chrono::seconds(1));
 			update_ui_thread_worker(); // Try again a bit later
 		}).detach();
-
-		// Show the hidden ui elements
-		if (hasBeenLoaded) {
-			m_ip_text_block->Visibility(true);
-			m_port_text_block->Visibility(true);
-
-			m_calibrate_forward_button->Visibility(true);
-			m_calibrate_down_button->Visibility(true);
-		}
 	}
 }
 

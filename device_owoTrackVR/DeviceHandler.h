@@ -53,9 +53,9 @@ public:
 	{
 		LOG(INFO) << "Constructing the OWO Handler for JointsBasis K2TrackingDevice...";
 
-		K2TrackingDeviceBase_JointsBasis::deviceType = ktvr::K2_Joints;
-		K2TrackingDeviceBase_JointsBasis::deviceName = "owoTrackVR";
-		K2TrackingDeviceBase_JointsBasis::settingsSupported = true;
+		deviceType = ktvr::K2_Joints;
+		deviceName = "owoTrackVR";
+		settingsSupported = false; // Not yet, but soonTM
 
 		// Mark that our device supports settings
 		settingsSupported = true;
@@ -63,7 +63,7 @@ public:
 		load_settings(); // Load settings
 	}
 
-	virtual ~DeviceHandler()
+	~DeviceHandler() override
 	{
 	}
 
@@ -75,21 +75,17 @@ public:
 
 		// Create elements
 		m_ip_text_block = CreateTextBlock(L"Your Local IP: [ 127.0.0.1 ]");
-		m_port_text_block = CreateTextBlock(L"Connection Port: [ " + std::to_wstring(m_net_port) + L" ]");
+		m_port_text_block = CreateTextBlock(L"Connection Port: " + std::to_wstring(m_net_port) + L"\n");
 
 		m_message_text_block = CreateTextBlock(L"Please start the server first!");
-		m_main_progress_bar = CreateProgressBar();
 
-		//m_hip_height_number_box = CreateNumberBox(-(m_tracker_offset.y() * 100.0));
-
+		m_calibration_text_block = CreateTextBlock(L"");
+		m_calibration_text_block->Visibility(false);
+		
 		m_calibrate_forward_button = CreateButton(L"Calibrate Forward");
 		m_calibrate_down_button = CreateButton(L"Calibrate Down");
 
 		// Set up elements
-		m_main_progress_bar->Width(306);
-		m_main_progress_bar->Progress(100);
-		m_main_progress_bar->ShowPaused(true);
-
 		m_calibrate_forward_button->Width(150);
 		m_calibrate_down_button->Width(150);
 
@@ -103,26 +99,16 @@ public:
 		layoutRoot->AppendSingleElement(
 			m_port_text_block);
 
-		// Append the elements : Spacer
-		layoutRoot->AppendSingleElement(
-			CreateTextBlock(L" ")); // A spacer
-
+		// Append the elements : Dynamic Data
 		layoutRoot->AppendSingleElement(
 			m_message_text_block,
-			ktvr::Interface::SingleLayoutHorizontalAlignment::Center);
+			ktvr::Interface::SingleLayoutHorizontalAlignment::Left);
 
-		layoutRoot->AppendSingleElement(
-			m_main_progress_bar,
-			ktvr::Interface::SingleLayoutHorizontalAlignment::Center);
-
-		//layoutRoot->AppendElementPair(
-		//	CreateTextBlock(
-		//		"Hip Height:"),
-		//	m_hip_height_number_box);
-
-		layoutRoot->AppendElementPair(
+		layoutRoot->AppendElementPairStack(
 			m_calibrate_forward_button,
 			m_calibrate_down_button);
+
+		layoutRoot->AppendSingleElement(m_calibration_text_block);
 
 		// Hide post-init ui elements
 		m_ip_text_block->Visibility(false);
@@ -144,24 +130,30 @@ public:
 			{
 				if (!initialized)return;
 
-				m_message_text_block->Text(L"Point your phone forward, screen up...");
-				m_main_progress_bar->Progress(100);
-				m_main_progress_bar->ShowPaused(true);
+				m_calibration_text_block->Visibility(true);
+				m_calibration_text_block->Text(
+					L"Hold your phone in the same direction\n"
+					L"as your VR headset orientation, screen facing up...");
 
 				m_calibrate_forward_button->IsEnabled(false);
 				m_calibrate_down_button->IsEnabled(false);
 
-				std::this_thread::sleep_for(std::chrono::seconds(4));
-				if (!initialized)return;
+				std::this_thread::sleep_for(std::chrono::seconds(7));
+				if (!initialized)
+				{
+					m_is_calibrating_forward = false;
+					m_calibration_text_block->Visibility(false);
+					return; // Abort
+				}
+
 				m_is_calibrating_forward = true;
 
-				m_main_progress_bar->ShowPaused(false);
-				m_main_progress_bar->Progress(-1);
-
-				m_message_text_block->Text(L"Please stay like that a bit...");
+				m_calibration_text_block->Text(L"Please stay like that a bit...");
 				std::this_thread::sleep_for(std::chrono::seconds(4));
 
 				m_is_calibrating_forward = false;
+				m_calibration_text_block->Visibility(false);
+
 				save_settings(); // Back everything up
 				update_ui_thread_worker();
 			}).detach();
@@ -175,24 +167,30 @@ public:
 			{
 				if (!initialized)return;
 
-				m_message_text_block->Text(L"Mount your phone in its place now...");
-				m_main_progress_bar->Progress(100);
-				m_main_progress_bar->ShowPaused(true);
+				m_calibration_text_block->Visibility(true);
+				m_calibration_text_block->Text(
+					L"Attach your phone to your waist now,\n"
+					L"stand straight in your natural forward position...");
 
 				m_calibrate_forward_button->IsEnabled(false);
 				m_calibrate_down_button->IsEnabled(false);
 
-				std::this_thread::sleep_for(std::chrono::seconds(4));
-				if (!initialized)return;
+				std::this_thread::sleep_for(std::chrono::seconds(7));
+				if (!initialized)
+				{
+					m_is_calibrating_forward = false;
+					m_calibration_text_block->Visibility(false);
+					return; // Abort
+				}
+
 				m_is_calibrating_down = true;
 
-				m_main_progress_bar->ShowPaused(false);
-				m_main_progress_bar->Progress(-1);
-
-				m_message_text_block->Text(L"Please stay like that a bit...");
+				m_calibration_text_block->Text(L"Please stay like that a bit...");
 				std::this_thread::sleep_for(std::chrono::seconds(4));
 
 				m_is_calibrating_down = false;
+				m_calibration_text_block->Visibility(false);
+
 				save_settings(); // Back everything up
 				update_ui_thread_worker();
 			}).detach();
@@ -211,7 +209,7 @@ public:
 			LOG(INFO) << "OWO Device: My host name is " << ac;
 
 			hostent* phe = gethostbyname(ac);
-			if (phe == 0)
+			if (phe == nullptr)
 			{
 				LOG(ERROR) << "OWO Device Error: Bad host lookup";
 				return;
@@ -219,25 +217,14 @@ public:
 
 			// Append to the UI
 			std::string _addr_str("Your Local IP: (One of) [ ");
-			int _format_i = 1;
 
-			for (int i = 0; phe->h_addr_list[i] != 0; ++i)
+			for (int i = 0; phe->h_addr_list[i] != nullptr; ++i)
 			{
 				in_addr addr;
 				memcpy(&addr, phe->h_addr_list[i], sizeof(struct in_addr));
 
 				_addr_str.append(inet_ntoa(addr));
-
-				if (_format_i < 1)
-				{
-					_addr_str.append(", ");
-					_format_i++;
-				}
-				else
-				{
-					_addr_str.append(",\n                      ");
-					_format_i = 0;
-				}
+				_addr_str.append(", ");
 			}
 
 			_addr_str = _addr_str.substr(
@@ -344,10 +331,10 @@ public:
 	     m_is_calibrating_down = false;
 
 	// Interface elements
-	ktvr::Interface::TextBlock *m_ip_text_block, *m_port_text_block, *m_message_text_block;
+	ktvr::Interface::TextBlock *m_ip_text_block, *m_port_text_block,
+	                           *m_message_text_block, *m_calibration_text_block;
 	ktvr::Interface::NumberBox* m_hip_height_number_box;
 	ktvr::Interface::Button *m_calibrate_forward_button, *m_calibrate_down_button;
-	ktvr::Interface::ProgressBar* m_main_progress_bar;
 
 	/* Internal, helper variables */
 	UDPDeviceQuatServer* m_data_server;
@@ -365,6 +352,8 @@ public:
 	std::unique_ptr<std::thread> m_update_server_thread,
 	                             m_update_ui_thread;
 
+	bool update_ui_thread_worker_pending = false;
+
 	void update_ui_thread_worker()
 	{
 		if (!m_is_calibrating_forward && !m_is_calibrating_down
@@ -372,21 +361,35 @@ public:
 		{
 			if (m_status_result == S_OK)
 			{
-				m_message_text_block->Text(L"owoTrackVR Running OK");
-				m_main_progress_bar->Progress(100);
-				m_main_progress_bar->ShowPaused(false);
+				m_message_text_block->Visibility(false);
+
+				m_calibrate_forward_button->Visibility(true);
+				m_calibrate_down_button->Visibility(true);
 
 				m_calibrate_forward_button->IsEnabled(true);
 				m_calibrate_down_button->IsEnabled(true);
 			}
 			else
 			{
+				m_message_text_block->Visibility(true);
 				m_message_text_block->Text(L"Please connect your phone!");
-				m_main_progress_bar->Progress(100);
-				m_main_progress_bar->ShowPaused(true);
+
+				m_calibrate_forward_button->Visibility(false);
+				m_calibrate_down_button->Visibility(false);
 
 				m_calibrate_forward_button->IsEnabled(false);
 				m_calibrate_down_button->IsEnabled(false);
+
+				std::thread([&, this]
+				{
+					if (!update_ui_thread_worker_pending)
+					{
+						update_ui_thread_worker_pending = true;
+						std::this_thread::sleep_for(std::chrono::seconds(1));
+						update_ui_thread_worker(); // Try again a bit later
+						update_ui_thread_worker_pending = false;
+					}
+				}).detach();
 			}
 		}
 	}
@@ -450,7 +453,7 @@ extern "C" __declspec(dllexport) void* TrackingDeviceBaseFactory(
 	// but only if interfaces are the same / up-to-date
 	if (0 == strcmp(ktvr::IK2API_Devices_Version, pVersionName))
 	{
-		static DeviceHandler* TrackingHandler = new DeviceHandler(); // Create a new device handler -> owoTrack
+		static auto TrackingHandler = new DeviceHandler(); // Create a new device handler -> owoTrack
 
 		*pReturnCode = ktvr::K2InitError_None;
 		return TrackingHandler;
