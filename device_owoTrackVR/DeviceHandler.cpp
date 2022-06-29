@@ -11,16 +11,6 @@
 
 HRESULT DeviceHandler::getStatusResult()
 {
-	// Show the post-init, hidden ui elements
-	if (hasBeenLoaded)
-	{
-		m_ip_text_block->Visibility(true);
-		m_port_text_block->Visibility(true);
-
-		m_calibrate_forward_button->Visibility(true);
-		m_calibrate_down_button->Visibility(true);
-	}
-
 	update_ui_thread_worker();
 	return m_status_result;
 }

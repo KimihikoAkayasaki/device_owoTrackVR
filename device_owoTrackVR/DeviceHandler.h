@@ -81,8 +81,14 @@ public:
 		// Construct the device's settings here
 
 		// Create elements
-		m_ip_text_block = CreateTextBlock(L"Your Local IP: 127.0.0.1");
-		m_port_text_block = CreateTextBlock(L"Connection Port: " + std::to_wstring(m_net_port) + L"\n");
+		m_ip_label_text_block = CreateTextBlock(L"Your Local IP: ");
+		m_ip_text_block = CreateTextBlock(L"127.0.0.1");
+
+		m_port_label_text_block = CreateTextBlock(L"Connection Port: \n");
+		m_port_text_block = CreateTextBlock(std::to_wstring(m_net_port) + L"\n");
+
+		m_ip_label_text_block->IsPrimary(false);
+		m_port_label_text_block->IsPrimary(false);
 
 		m_message_text_block = CreateTextBlock(L"Please start the server first!");
 
@@ -100,10 +106,12 @@ public:
 		m_calibrate_down_button->IsEnabled(false);
 
 		// Append the elements : Static Data
-		layoutRoot->AppendSingleElement(
+		layoutRoot->AppendElementPairStack(
+			m_ip_label_text_block,
 			m_ip_text_block);
 
-		layoutRoot->AppendSingleElement(
+		layoutRoot->AppendElementPairStack(
+			m_port_label_text_block,
 			m_port_text_block);
 
 		// Append the elements : Dynamic Data
@@ -116,13 +124,6 @@ public:
 			m_calibrate_down_button);
 
 		layoutRoot->AppendSingleElement(m_calibration_text_block);
-
-		// Hide post-init ui elements
-		m_ip_text_block->Visibility(false);
-		m_port_text_block->Visibility(false);
-
-		m_calibrate_forward_button->Visibility(false);
-		m_calibrate_down_button->Visibility(false);
 
 		// Mark everything as set up
 		hasBeenLoaded = true;
@@ -255,15 +256,18 @@ public:
 			if (!_addr_vector.empty())
 			{
 				std::string _addr_str =
-					_addr_vector.size() > 1
-						? "Your Local IP: (One of) [ "
-						: "Your Local IP: ";
+					_addr_vector.size() > 1 ? "[ " : "";
 
-				for(const auto& _address : _addr_vector)
+				for (const auto& _address : _addr_vector)
 					_addr_str += _address + ", ";
 
 				_addr_str = _addr_str.substr(0, _addr_str.rfind(","));
 				if (_addr_vector.size() > 1)_addr_str += " ]"; // End array
+
+				m_ip_label_text_block->Text(
+					_addr_vector.size() > 1
+						? L"Your Local IP: (One of) "
+						: L"Your Local IP: ");
 
 				m_ip_text_block->Text(StringToWString(_addr_str));
 			}
@@ -368,7 +372,8 @@ public:
 	     m_is_calibrating_down = false;
 
 	// Interface elements
-	ktvr::Interface::TextBlock *m_ip_text_block, *m_port_text_block,
+	ktvr::Interface::TextBlock *m_ip_text_block, *m_ip_label_text_block,
+	                           *m_port_text_block, *m_port_label_text_block,
 	                           *m_message_text_block, *m_calibration_text_block;
 	ktvr::Interface::NumberBox* m_hip_height_number_box;
 	ktvr::Interface::Button *m_calibrate_forward_button, *m_calibrate_down_button;
@@ -434,7 +439,7 @@ public:
 	[[noreturn]] void update_server_thread_worker()
 	{
 		// How many retries have been made before marking
-		// the connection dead (assume max 60 retries or 1 second)
+		// the connection dead (assume max 180 retries or 3 seconds)
 		int32_t e_retries = 0;
 
 		while (true)
@@ -465,14 +470,14 @@ public:
 
 				if (!m_data_server->isDataAvailable())
 				{
-					if (e_retries >= 60)
+					if (e_retries >= 180)
 					{
 						e_retries = 0; // Reset
 						skeletonTracked = false;
 						m_status_result =
 							m_data_server->isConnectionAlive()
-							? R_E_NO_DATA
-							: R_E_CONNECTION_DEAD;
+								? R_E_NO_DATA
+								: R_E_CONNECTION_DEAD;
 					}
 					else e_retries++;
 				}

@@ -30,7 +30,7 @@ inline std::string WStringToString(const std::wstring& s)
 namespace ktvr
 {
 	// Interface Version
-	static const char* IK2API_Devices_Version = "IK2API_Version_010";
+	static const char* IK2API_Devices_Version = "IK2API_Version_011";
 
 	// Return messaging types
 	enum K2InitErrorType
@@ -174,6 +174,13 @@ namespace ktvr
 			virtual bool Visibility() { return true; }
 
 			virtual void Visibility(const bool& visibility)
+			{
+			}
+
+			// IsPrimary (White/Gray) Get and Set
+			virtual bool IsPrimary() { return true; }
+
+			virtual void IsPrimary(const bool& primary)
 			{
 			}
 
