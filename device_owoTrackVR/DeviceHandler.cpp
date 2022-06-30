@@ -7,10 +7,14 @@
 
 #include <basis.h>
 
-#include "LocalizedStatuses.h"
-
 HRESULT DeviceHandler::getStatusResult()
 {
+	if (hasBeenLoaded)
+	{
+		m_ip_text_block->Visibility(true);
+		m_port_text_block->Visibility(true);
+	}
+
 	update_ui_thread_worker();
 	return m_status_result;
 }
@@ -41,6 +45,7 @@ std::wstring DeviceHandler::statusResultWString(HRESULT stat)
 void DeviceHandler::initialize()
 {
 	// Initialize your device here
+	settingsSupported = true;
 	trackedJoints.clear();
 	trackedJoints.push_back(ktvr::K2TrackedJoint("Default"));
 
@@ -68,7 +73,7 @@ void DeviceHandler::initialize()
 
 			if (hasBeenLoaded)
 			{
-				m_message_text_block->Text(L"Server has failed to start up!");
+				m_message_text_block->Text(GetLocalizedStatusWStringAutomatic(server_failure_map));
 			}
 		}
 	}

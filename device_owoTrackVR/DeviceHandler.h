@@ -6,6 +6,9 @@
 #include <Amethyst_API_Devices.h>
 #include <Amethyst_API_Paths.h>
 
+#include "LocalizedStatuses.h"
+#include "LocalizedSettings.h"
+
 #include <cereal/types/unordered_map.hpp>
 #include <cereal/types/memory.hpp>
 #include <cereal/archives/xml.hpp>
@@ -63,10 +66,7 @@ public:
 		deviceType = ktvr::K2_Joints;
 		deviceName = "owoTrackVR";
 		settingsSupported = false; // Not yet, but soonTM
-
-		// Mark that our device supports settings
-		settingsSupported = true;
-
+		
 		load_settings(); // Load settings
 	}
 
@@ -81,22 +81,27 @@ public:
 		// Construct the device's settings here
 
 		// Create elements
-		m_ip_label_text_block = CreateTextBlock(L"Your Local IP: ");
+		m_ip_label_text_block = CreateTextBlock(
+			GetLocalizedStatusWStringAutomatic(local_ip_single_label_map));
 		m_ip_text_block = CreateTextBlock(L"127.0.0.1");
 
-		m_port_label_text_block = CreateTextBlock(L"Connection Port: \n");
+		m_port_label_text_block = CreateTextBlock(
+			GetLocalizedStatusWStringAutomatic(connection_port_label_map));
 		m_port_text_block = CreateTextBlock(std::to_wstring(m_net_port) + L"\n");
 
 		m_ip_label_text_block->IsPrimary(false);
 		m_port_label_text_block->IsPrimary(false);
 
-		m_message_text_block = CreateTextBlock(L"Please start the server first!");
+		m_message_text_block = CreateTextBlock(
+			GetLocalizedStatusWStringAutomatic(notice_not_started_map));
 
 		m_calibration_text_block = CreateTextBlock(L"");
 		m_calibration_text_block->Visibility(false);
 
-		m_calibrate_forward_button = CreateButton(L"Calibrate Forward");
-		m_calibrate_down_button = CreateButton(L"Calibrate Down");
+		m_calibrate_forward_button = CreateButton(
+			GetLocalizedStatusWStringAutomatic(button_calibrate_forward_map));
+		m_calibrate_down_button = CreateButton(
+			GetLocalizedStatusWStringAutomatic(button_calibrate_down_map));
 
 		// Set up elements
 		m_calibrate_forward_button->Width(150);
@@ -125,6 +130,13 @@ public:
 
 		layoutRoot->AppendSingleElement(m_calibration_text_block);
 
+		// Hide post-init ui elements
+		m_ip_text_block->Visibility(false);
+		m_port_text_block->Visibility(false);
+
+		m_calibrate_forward_button->Visibility(false);
+		m_calibrate_down_button->Visibility(false);
+
 		// Mark everything as set up
 		hasBeenLoaded = true;
 
@@ -140,8 +152,7 @@ public:
 
 				m_calibration_text_block->Visibility(true);
 				m_calibration_text_block->Text(
-					L"Hold your phone in the same direction\n"
-					L"as your VR headset orientation, screen facing up...");
+					GetLocalizedStatusWStringAutomatic(calibration_instructions_forward_map));
 
 				m_calibrate_forward_button->IsEnabled(false);
 				m_calibrate_down_button->IsEnabled(false);
@@ -156,7 +167,7 @@ public:
 
 				m_is_calibrating_forward = true;
 
-				m_calibration_text_block->Text(L"Please stay like that a bit...");
+				m_calibration_text_block->Text(GetLocalizedStatusWStringAutomatic(stay_still_map));
 				std::this_thread::sleep_for(std::chrono::seconds(4));
 
 				m_is_calibrating_forward = false;
@@ -177,8 +188,7 @@ public:
 
 				m_calibration_text_block->Visibility(true);
 				m_calibration_text_block->Text(
-					L"Attach your phone to your waist now,\n"
-					L"stand straight in your natural forward position...");
+					GetLocalizedStatusWStringAutomatic(calibration_instructions_down_map));
 
 				m_calibrate_forward_button->IsEnabled(false);
 				m_calibrate_down_button->IsEnabled(false);
@@ -193,7 +203,7 @@ public:
 
 				m_is_calibrating_down = true;
 
-				m_calibration_text_block->Text(L"Please stay like that a bit...");
+				m_calibration_text_block->Text(GetLocalizedStatusWStringAutomatic(stay_still_map));
 				std::this_thread::sleep_for(std::chrono::seconds(4));
 
 				m_is_calibrating_down = false;
@@ -266,8 +276,8 @@ public:
 
 				m_ip_label_text_block->Text(
 					_addr_vector.size() > 1
-						? L"Your Local IP: (One of) "
-						: L"Your Local IP: ");
+						? GetLocalizedStatusWStringAutomatic(local_ip_multiple_label_map)
+						: GetLocalizedStatusWStringAutomatic(local_ip_single_label_map));
 
 				m_ip_text_block->Text(StringToWString(_addr_str));
 			}
@@ -414,7 +424,8 @@ public:
 			else
 			{
 				m_message_text_block->Visibility(true);
-				m_message_text_block->Text(L"Please connect your phone!");
+				m_message_text_block->Text(
+					GetLocalizedStatusWStringAutomatic(notice_not_connected_map));
 
 				m_calibrate_forward_button->Visibility(false);
 				m_calibrate_down_button->Visibility(false);
