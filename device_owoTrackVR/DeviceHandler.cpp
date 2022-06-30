@@ -64,6 +64,7 @@ void DeviceHandler::initialize()
 		try
 		{
 			m_data_server->startListening();
+			m_status_result = R_E_CONNECTION_DEAD;
 		}
 		catch (std::system_error& e)
 		{
@@ -89,12 +90,7 @@ void DeviceHandler::initialize()
 		m_is_calibrating_forward = false;
 		m_is_calibrating_down = false;
 
-		std::thread([&, this]
-		{
-			update_ui_thread_worker();
-			std::this_thread::sleep_for(std::chrono::seconds(1));
-			update_ui_thread_worker(); // Try again a bit later
-		}).detach();
+		update_ui_thread_worker();
 	}
 }
 

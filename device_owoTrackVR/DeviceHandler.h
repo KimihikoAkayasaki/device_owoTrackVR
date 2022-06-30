@@ -66,7 +66,7 @@ public:
 		deviceType = ktvr::K2_Joints;
 		deviceName = "owoTrackVR";
 		settingsSupported = false; // Not yet, but soonTM
-		
+
 		load_settings(); // Load settings
 	}
 
@@ -74,7 +74,8 @@ public:
 	{
 	}
 
-	bool hasBeenLoaded = false;
+	bool hasBeenLoaded = false,
+	     calibrationPending = false;
 
 	void onLoad() override
 	{
@@ -150,6 +151,8 @@ public:
 			{
 				if (!initialized)return;
 
+				calibrationPending = true;
+
 				m_calibration_text_block->Visibility(true);
 				m_calibration_text_block->Text(
 					GetLocalizedStatusWStringAutomatic(calibration_instructions_forward_map));
@@ -173,6 +176,8 @@ public:
 				m_is_calibrating_forward = false;
 				m_calibration_text_block->Visibility(false);
 
+				calibrationPending = false;
+
 				save_settings(); // Back everything up
 				update_ui_thread_worker();
 			}).detach();
@@ -185,6 +190,8 @@ public:
 			std::thread([&, this]
 			{
 				if (!initialized)return;
+
+				calibrationPending = true;
 
 				m_calibration_text_block->Visibility(true);
 				m_calibration_text_block->Text(
@@ -208,6 +215,8 @@ public:
 
 				m_is_calibrating_down = false;
 				m_calibration_text_block->Visibility(false);
+
+				calibrationPending = false;
 
 				save_settings(); // Back everything up
 				update_ui_thread_worker();
@@ -418,8 +427,11 @@ public:
 				m_calibrate_forward_button->Visibility(true);
 				m_calibrate_down_button->Visibility(true);
 
-				m_calibrate_forward_button->IsEnabled(true);
-				m_calibrate_down_button->IsEnabled(true);
+				if (!calibrationPending)
+				{
+					m_calibrate_forward_button->IsEnabled(true);
+					m_calibrate_down_button->IsEnabled(true);
+				}
 			}
 			else
 			{
@@ -430,8 +442,11 @@ public:
 				m_calibrate_forward_button->Visibility(false);
 				m_calibrate_down_button->Visibility(false);
 
-				m_calibrate_forward_button->IsEnabled(false);
-				m_calibrate_down_button->IsEnabled(false);
+				if (!calibrationPending)
+				{
+					m_calibrate_forward_button->IsEnabled(false);
+					m_calibrate_down_button->IsEnabled(false);
+				}
 
 				std::thread([&, this]
 				{
