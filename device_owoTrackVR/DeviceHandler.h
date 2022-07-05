@@ -105,9 +105,6 @@ public:
 			GetLocalizedStatusWStringAutomatic(button_calibrate_down_map));
 
 		// Set up elements
-		m_calibrate_forward_button->Width(150);
-		m_calibrate_down_button->Width(150);
-
 		m_calibrate_forward_button->IsEnabled(false);
 		m_calibrate_down_button->IsEnabled(false);
 
