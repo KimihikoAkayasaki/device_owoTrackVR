@@ -176,7 +176,7 @@ public:
 				calibrationPending = false;
 
 				save_settings(); // Back everything up
-				update_ui_thread_worker();
+				update_ui_worker();
 			}).detach();
 		};
 
@@ -216,7 +216,7 @@ public:
 				calibrationPending = false;
 
 				save_settings(); // Back everything up
-				update_ui_thread_worker();
+				update_ui_worker();
 			}).detach();
 		};
 
@@ -411,12 +411,21 @@ public:
 	                             m_update_ui_thread;
 
 	bool update_ui_thread_worker_pending = false;
+	HRESULT update_ui_status_backup = R_E_NOT_STARTED;
 
-	void update_ui_thread_worker()
+	void update_ui_worker()
 	{
-		if (!m_is_calibrating_forward && !m_is_calibrating_down
+		if (!m_is_calibrating_forward && 
+			!m_is_calibrating_down
 			&& initialized && hasBeenLoaded)
 		{
+			// Nothing's changed, no need to update
+			if (m_status_result == update_ui_status_backup)return;
+
+			// Request Amethyst UI update
+			requestStatusUIRefresh();
+
+			// Update the settings UI
 			if (m_status_result == S_OK)
 			{
 				m_message_text_block->Visibility(false);
@@ -444,18 +453,10 @@ public:
 					m_calibrate_forward_button->IsEnabled(false);
 					m_calibrate_down_button->IsEnabled(false);
 				}
-
-				std::thread([&, this]
-				{
-					if (!update_ui_thread_worker_pending)
-					{
-						update_ui_thread_worker_pending = true;
-						std::this_thread::sleep_for(std::chrono::seconds(1));
-						update_ui_thread_worker(); // Try again a bit later
-						update_ui_thread_worker_pending = false;
-					}
-				}).detach();
 			}
+
+			// Cache the status
+			update_ui_status_backup = m_status_result;
 		}
 	}
 
@@ -515,6 +516,17 @@ public:
 
 			std::this_thread::sleep_for(
 				std::chrono::milliseconds(22));
+		}
+	}
+
+	[[noreturn]] void update_device_ui_thread_worker()
+	{
+		while (true)
+		{
+			update_ui_worker();
+
+			std::this_thread::sleep_for(
+				std::chrono::seconds(3));
 		}
 	}
 };
