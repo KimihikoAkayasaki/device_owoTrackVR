@@ -93,6 +93,11 @@ public:
 		m_ip_label_text_block->IsPrimary(false);
 		m_port_label_text_block->IsPrimary(false);
 
+		m_hip_height_number_box = CreateNumberBox(
+			static_cast<int>(-m_tracker_offset.y() * 100.0));
+
+		m_hip_height_number_box->Width(120);
+
 		m_message_text_block = CreateTextBlock(
 			GetLocalizedStatusWStringAutomatic(notice_not_started_map));
 
@@ -117,6 +122,13 @@ public:
 			m_port_label_text_block,
 			m_port_text_block);
 
+		auto _hip_height_label = CreateTextBlock(
+			GetLocalizedStatusWStringAutomatic(label_hip_height_map));
+		_hip_height_label->IsPrimary(false); // Mark as secondary
+
+		layoutRoot->AppendElementPairStack(
+			_hip_height_label, m_hip_height_number_box);
+
 		// Append the elements : Dynamic Data
 		layoutRoot->AppendSingleElement(
 			m_message_text_block,
@@ -139,6 +151,19 @@ public:
 		hasBeenLoaded = true;
 
 		// Set up particular handlers
+
+		// "Hip Height"
+		m_hip_height_number_box->OnValueChanged =
+			[&, this](ktvr::Interface::NumberBox* sender, const int& new_value)
+			{
+				const int fixed_new_value =
+					std::clamp(new_value, 60, 90);
+
+				sender->Value(fixed_new_value); // Overwrite
+				m_tracker_offset.y() = static_cast<double>(new_value) / -100.0;
+
+				save_settings();
+			};
 
 		// "Full Calibration"
 		m_calibrate_forward_button->OnClick = [&, this](ktvr::Interface::Button* sender)
@@ -415,7 +440,7 @@ public:
 
 	void update_ui_worker()
 	{
-		if (!m_is_calibrating_forward && 
+		if (!m_is_calibrating_forward &&
 			!m_is_calibrating_down
 			&& initialized && hasBeenLoaded)
 		{

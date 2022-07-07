@@ -88,6 +88,23 @@ inline std::map<std::wstring, std::wstring> notice_not_connected_map
 	}
 };
 
+inline std::map<std::wstring, std::wstring> label_hip_height_map
+{
+	// Yes, along with the \n
+	{
+		L"en-US",
+		L"Hip Height:"
+	},
+	{
+		L"lc-LC",
+		L"Hip Height:"
+	},
+	{
+		L"de-DE",
+		L"Hüfthöhe:"
+	}
+};
+
 inline std::map<std::wstring, std::wstring> button_calibrate_forward_map
 {
 	// Yes, along with the \n
