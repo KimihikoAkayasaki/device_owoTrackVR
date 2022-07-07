@@ -87,9 +87,6 @@ void DeviceHandler::initialize()
 		if (!m_update_server_thread)
 			m_update_server_thread.reset(new std::thread(&DeviceHandler::update_server_thread_worker, this));
 
-		if (!m_update_ui_thread)
-			m_update_ui_thread.reset(new std::thread(&DeviceHandler::update_device_ui_thread_worker, this));
-
 		m_is_calibrating_forward = false;
 		m_is_calibrating_down = false;
 

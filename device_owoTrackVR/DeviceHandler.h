@@ -96,7 +96,7 @@ public:
 		m_hip_height_number_box = CreateNumberBox(
 			static_cast<int>(-m_tracker_offset.y() * 100.0));
 
-		m_hip_height_number_box->Width(120);
+		// m_hip_height_number_box->Width(150);
 
 		m_message_text_block = CreateTextBlock(
 			GetLocalizedStatusWStringAutomatic(notice_not_started_map));
@@ -156,13 +156,26 @@ public:
 		m_hip_height_number_box->OnValueChanged =
 			[&, this](ktvr::Interface::NumberBox* sender, const int& new_value)
 			{
+				// Just ignore if it was us
+				if (m_hip_height_value_change_pending)return;
+				m_hip_height_value_change_pending = true; // Lock
+
+				// Backup to writable
+				int _value = new_value;
+
+				// Handle resets
+				if (_value < 0)_value = 75;
+
 				const int fixed_new_value =
-					std::clamp(new_value, 60, 90);
+					std::clamp(_value, 60, 90);
 
 				sender->Value(fixed_new_value); // Overwrite
-				m_tracker_offset.y() = static_cast<double>(new_value) / -100.0;
+				m_tracker_offset.y() =
+					static_cast<double>(fixed_new_value) / -100.0;
 
-				save_settings();
+				// We're done, unlock the handler
+				m_hip_height_value_change_pending = false;
+				save_settings(); // Save everything
 			};
 
 		// "Full Calibration"
@@ -416,8 +429,10 @@ public:
 	ktvr::Interface::TextBlock *m_ip_text_block, *m_ip_label_text_block,
 	                           *m_port_text_block, *m_port_label_text_block,
 	                           *m_message_text_block, *m_calibration_text_block;
-	ktvr::Interface::NumberBox* m_hip_height_number_box;
 	ktvr::Interface::Button *m_calibrate_forward_button, *m_calibrate_down_button;
+
+	ktvr::Interface::NumberBox* m_hip_height_number_box;
+	bool m_hip_height_value_change_pending = false;
 
 	/* Internal, helper variables */
 	UDPDeviceQuatServer* m_data_server;
@@ -432,10 +447,7 @@ public:
 		Eigen::Vector3f(0, 0, 0), Eigen::Quaternionf(1, 0, 0, 0)
 	};
 
-	std::unique_ptr<std::thread> m_update_server_thread,
-	                             m_update_ui_thread;
-
-	bool update_ui_thread_worker_pending = false;
+	std::unique_ptr<std::thread> m_update_server_thread;
 	HRESULT update_ui_status_backup = R_E_NOT_STARTED;
 
 	void update_ui_worker()
@@ -446,9 +458,6 @@ public:
 		{
 			// Nothing's changed, no need to update
 			if (m_status_result == update_ui_status_backup)return;
-
-			// Request Amethyst UI update
-			requestStatusUIRefresh();
 
 			// Update the settings UI
 			if (m_status_result == S_OK)
@@ -541,17 +550,6 @@ public:
 
 			std::this_thread::sleep_for(
 				std::chrono::milliseconds(22));
-		}
-	}
-
-	[[noreturn]] void update_device_ui_thread_worker()
-	{
-		while (true)
-		{
-			update_ui_worker();
-
-			std::this_thread::sleep_for(
-				std::chrono::seconds(3));
 		}
 	}
 };

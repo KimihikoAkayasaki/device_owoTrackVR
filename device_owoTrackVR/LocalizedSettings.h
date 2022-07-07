@@ -93,11 +93,11 @@ inline std::map<std::wstring, std::wstring> label_hip_height_map
 	// Yes, along with the \n
 	{
 		L"en-US",
-		L"Hip Height:"
+		L"Waist Height:"
 	},
 	{
 		L"lc-LC",
-		L"Hip Height:"
+		L"Waist Height:"
 	},
 	{
 		L"de-DE",
