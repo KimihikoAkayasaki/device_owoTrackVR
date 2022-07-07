@@ -88,7 +88,7 @@ public:
 
 		m_port_label_text_block = CreateTextBlock(
 			GetLocalizedStatusWStringAutomatic(connection_port_label_map));
-		m_port_text_block = CreateTextBlock(std::to_wstring(m_net_port) + L"\n");
+		m_port_text_block = CreateTextBlock(std::to_wstring(m_net_port));
 
 		m_ip_label_text_block->IsPrimary(false);
 		m_port_label_text_block->IsPrimary(false);
@@ -128,6 +128,9 @@ public:
 
 		layoutRoot->AppendElementPairStack(
 			_hip_height_label, m_hip_height_number_box);
+
+		// Separator
+		layoutRoot->AppendSingleElement(CreateTextBlock(L" "));
 
 		// Append the elements : Dynamic Data
 		layoutRoot->AppendSingleElement(
@@ -213,6 +216,9 @@ public:
 
 				calibrationPending = false;
 
+				m_calibrate_forward_button->IsEnabled(true);
+				m_calibrate_down_button->IsEnabled(true);
+
 				save_settings(); // Back everything up
 				update_ui_worker();
 			}).detach();
@@ -252,6 +258,9 @@ public:
 				m_calibration_text_block->Visibility(false);
 
 				calibrationPending = false;
+
+				m_calibrate_forward_button->IsEnabled(true);
+				m_calibrate_down_button->IsEnabled(true);
 
 				save_settings(); // Back everything up
 				update_ui_worker();

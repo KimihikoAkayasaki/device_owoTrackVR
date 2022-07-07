@@ -42,15 +42,15 @@ inline std::map<std::wstring, std::wstring> connection_port_label_map
 	// Yes, along with the \n
 	{
 		L"en-US",
-		L"Connection Port: \n"
+		L"Connection Port: "
 	},
 	{
 		L"lc-LC",
-		L"Connection Port: \n"
+		L"Connection Port: "
 	},
 	{
 		L"de-DE",
-		L"Verbindungsport: \n"
+		L"Verbindungsport: "
 	}
 };
 
