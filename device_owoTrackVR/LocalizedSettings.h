@@ -161,15 +161,15 @@ inline std::map<std::wstring, std::wstring> calibration_instructions_down_map
 	// \n is a line break
 	{
 		L"en-US",
-		L"Hold your phone in the same direction\nas your VR headset orientation, screen facing up..."
+		L"Attach your phone to your waist now,\nstand straight in your natural forward position..."
 	},
 	{
 		L"lc-LC",
-		L"Hold your phone in the same direction\nas your VR headset orientation, screen facing up..."
+		L"Attach your phone to your waist now,\nstand straight in your natural forward position..."
 	},
 	{
 		L"de-DE",
-		L"Halte dein Telefon in die gleiche Richtung\nwie dein VR-Headset. Bildschirm sollte nach oben zeigen."
+		L"Befestigen Sie Ihr Telefon jetzt an Ihrer Taille,\nstehen Sie gerade in natürlichen Vorwärtsposition..."
 	}
 };
 
