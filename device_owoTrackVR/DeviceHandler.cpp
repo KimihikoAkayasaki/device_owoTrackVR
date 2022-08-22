@@ -23,23 +23,21 @@ std::wstring DeviceHandler::statusResultWString(HRESULT stat)
 {
 	// Parse your device's status into some nice text here,
 	// it has to be formatted like [HEADER]\n[TYPE]\n[MESSAGE]
+	if (hasBeenLoaded)
+		switch (stat)
+		{
+		case S_OK: return requestLocalizedString(L"/Plugins/OWO/Statuses/Success");
+		case R_E_CONNECTION_DEAD: return requestLocalizedString(L"/Plugins/OWO/Statuses/ConnectionDead");
+		case R_E_NO_DATA: return requestLocalizedString(L"/Plugins/OWO/Statuses/NoData");
+		case R_E_INIT_FAILED: return requestLocalizedString(L"/Plugins/OWO/Statuses/InitFailure");
+		case R_E_NOT_STARTED: return requestLocalizedString(L"/Plugins/OWO/Statuses/NotStarted");
+		case S_FALSE:
+		default: return L"Undefined: " + std::to_wstring(stat) +
+				L"\nE_UNDEFINED\nSomething weird has happened, though we can't tell what.";
+		}
 
-	switch (stat)
-	{
-	case S_OK: return GetLocalizedStatusWStringAutomatic(status_ok_map);
-
-	case R_E_CONNECTION_DEAD: return GetLocalizedStatusWStringAutomatic(status_dead_map);
-
-	case R_E_NO_DATA: return GetLocalizedStatusWStringAutomatic(status_no_data_map);
-
-	case R_E_INIT_FAILED: return GetLocalizedStatusWStringAutomatic(status_init_fail_map);
-
-	case R_E_NOT_STARTED: return GetLocalizedStatusWStringAutomatic(status_not_started_map);
-
-	case S_FALSE:
-	default: return L"Undefined: " + std::to_wstring(stat) +
-			L"\nE_UNDEFINED\nSomething weird has happened, though we can't tell what.";
-	}
+	return L"Undefined: " + std::to_wstring(stat) +
+		L"\nE_UNDEFINED\nSomething weird has happened, though we can't tell what.";
 }
 
 void DeviceHandler::initialize()
@@ -74,7 +72,7 @@ void DeviceHandler::initialize()
 
 			if (hasBeenLoaded)
 			{
-				m_message_text_block->Text(GetLocalizedStatusWStringAutomatic(server_failure_map));
+				m_message_text_block->Text(requestLocalizedString(L"/Plugins/OWO/Notices/Failure"));
 			}
 		}
 	}

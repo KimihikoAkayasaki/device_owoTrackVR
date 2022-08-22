@@ -6,9 +6,6 @@
 #include <Amethyst_API_Devices.h>
 #include <Amethyst_API_Paths.h>
 
-#include "LocalizedStatuses.h"
-#include "LocalizedSettings.h"
-
 #include <cereal/types/unordered_map.hpp>
 #include <cereal/types/memory.hpp>
 #include <cereal/archives/xml.hpp>
@@ -80,14 +77,14 @@ public:
 	void onLoad() override
 	{
 		// Construct the device's settings here
-
+		
 		// Create elements
 		m_ip_label_text_block = CreateTextBlock(
-			GetLocalizedStatusWStringAutomatic(local_ip_single_label_map));
+			requestLocalizedString(L"/Plugins/OWO/Settings/Labels/LocalIP/One"));
 		m_ip_text_block = CreateTextBlock(L"127.0.0.1");
 
 		m_port_label_text_block = CreateTextBlock(
-			GetLocalizedStatusWStringAutomatic(connection_port_label_map));
+			requestLocalizedString(L"/Plugins/OWO/Settings/Labels/Port"));
 		m_port_text_block = CreateTextBlock(std::to_wstring(m_net_port));
 
 		m_ip_label_text_block->IsPrimary(false);
@@ -99,15 +96,15 @@ public:
 		// m_hip_height_number_box->Width(150);
 
 		m_message_text_block = CreateTextBlock(
-			GetLocalizedStatusWStringAutomatic(notice_not_started_map));
+			requestLocalizedString(L"/Plugins/OWO/Settings/Notices/NotStarted"));
 
 		m_calibration_text_block = CreateTextBlock(L"");
 		m_calibration_text_block->Visibility(false);
 
 		m_calibrate_forward_button = CreateButton(
-			GetLocalizedStatusWStringAutomatic(button_calibrate_forward_map));
+			requestLocalizedString(L"/Plugins/OWO/Settings/Buttons/Calibration/Forward"));
 		m_calibrate_down_button = CreateButton(
-			GetLocalizedStatusWStringAutomatic(button_calibrate_down_map));
+			requestLocalizedString(L"/Plugins/OWO/Settings/Buttons/Calibration/Down"));
 
 		// Set up elements
 		m_calibrate_forward_button->IsEnabled(false);
@@ -123,7 +120,7 @@ public:
 			m_port_text_block);
 
 		auto _hip_height_label = CreateTextBlock(
-			GetLocalizedStatusWStringAutomatic(label_hip_height_map));
+			requestLocalizedString(L"/Plugins/OWO/Settings/Labels/HipHeight"));
 		_hip_height_label->IsPrimary(false); // Mark as secondary
 
 		layoutRoot->AppendElementPairStack(
@@ -193,7 +190,7 @@ public:
 
 				m_calibration_text_block->Visibility(true);
 				m_calibration_text_block->Text(
-					GetLocalizedStatusWStringAutomatic(calibration_instructions_forward_map));
+					requestLocalizedString(L"/Plugins/OWO/Settings/Instructions/Forward"));
 
 				m_calibrate_forward_button->IsEnabled(false);
 				m_calibrate_down_button->IsEnabled(false);
@@ -208,7 +205,7 @@ public:
 
 				m_is_calibrating_forward = true;
 
-				m_calibration_text_block->Text(GetLocalizedStatusWStringAutomatic(stay_still_map));
+				m_calibration_text_block->Text(requestLocalizedString(L"/Plugins/OWO/Settings/Notices/Still"));
 				std::this_thread::sleep_for(std::chrono::seconds(4));
 
 				m_is_calibrating_forward = false;
@@ -236,7 +233,7 @@ public:
 
 				m_calibration_text_block->Visibility(true);
 				m_calibration_text_block->Text(
-					GetLocalizedStatusWStringAutomatic(calibration_instructions_down_map));
+					requestLocalizedString(L"/Plugins/OWO/Settings/Instructions/Down"));
 
 				m_calibrate_forward_button->IsEnabled(false);
 				m_calibrate_down_button->IsEnabled(false);
@@ -251,7 +248,7 @@ public:
 
 				m_is_calibrating_down = true;
 
-				m_calibration_text_block->Text(GetLocalizedStatusWStringAutomatic(stay_still_map));
+				m_calibration_text_block->Text(requestLocalizedString(L"/Plugins/OWO/Settings/Notices/Still"));
 				std::this_thread::sleep_for(std::chrono::seconds(4));
 
 				m_is_calibrating_down = false;
@@ -329,8 +326,8 @@ public:
 
 				m_ip_label_text_block->Text(
 					_addr_vector.size() > 1
-						? GetLocalizedStatusWStringAutomatic(local_ip_multiple_label_map)
-						: GetLocalizedStatusWStringAutomatic(local_ip_single_label_map));
+						? requestLocalizedString(L"/Plugins/OWO/Settings/Labels/LocalIP/Multiple")
+						: requestLocalizedString(L"/Plugins/OWO/Settings/Labels/LocalIP/One"));
 
 				m_ip_text_block->Text(StringToWString(_addr_str));
 			}
@@ -486,7 +483,7 @@ public:
 			{
 				m_message_text_block->Visibility(true);
 				m_message_text_block->Text(
-					GetLocalizedStatusWStringAutomatic(notice_not_connected_map));
+					requestLocalizedString(L"/Plugins/OWO/Settings/Notices/NotConnected"));
 
 				m_calibrate_forward_button->Visibility(false);
 				m_calibrate_down_button->Visibility(false);
