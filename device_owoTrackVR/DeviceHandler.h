@@ -77,7 +77,7 @@ public:
 	void onLoad() override
 	{
 		// Construct the device's settings here
-		
+
 		// Create elements
 		m_ip_label_text_block = CreateTextBlock(
 			requestLocalizedString(L"/Plugins/OWO/Settings/Labels/LocalIP/One"));
@@ -332,6 +332,9 @@ public:
 				m_ip_text_block->Text(StringToWString(_addr_str));
 			}
 		}).detach();
+
+		// Force reload the UI
+		update_ui_worker(true);
 	}
 
 	HRESULT getStatusResult() override;
@@ -456,14 +459,16 @@ public:
 	std::unique_ptr<std::thread> m_update_server_thread;
 	HRESULT update_ui_status_backup = R_E_NOT_STARTED;
 
-	void update_ui_worker()
+	void update_ui_worker(const bool& force_reload_ui = false)
 	{
 		if (!m_is_calibrating_forward &&
 			!m_is_calibrating_down
 			&& initialized && hasBeenLoaded)
 		{
 			// Nothing's changed, no need to update
-			if (m_status_result == update_ui_status_backup)return;
+			if (!force_reload_ui &&
+				m_status_result == update_ui_status_backup)
+				return;
 
 			// Update the settings UI
 			if (m_status_result == S_OK)

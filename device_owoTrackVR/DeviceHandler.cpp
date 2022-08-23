@@ -88,7 +88,7 @@ void DeviceHandler::initialize()
 		m_is_calibrating_forward = false;
 		m_is_calibrating_down = false;
 
-		update_ui_worker();
+		update_ui_worker(true);
 	}
 }
 
