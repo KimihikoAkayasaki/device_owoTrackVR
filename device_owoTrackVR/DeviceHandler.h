@@ -80,11 +80,11 @@ public:
 
 		// Create elements
 		m_ip_label_text_block = CreateTextBlock(
-			requestLocalizedString(L"/Plugins/OWO/Settings/Labels/LocalIP/One"));
+			requestLocalizedString(L"/Plugins/OWO/Settings/Labels/LocalIP/One") + L" ");
 		m_ip_text_block = CreateTextBlock(L"127.0.0.1");
 
 		m_port_label_text_block = CreateTextBlock(
-			requestLocalizedString(L"/Plugins/OWO/Settings/Labels/Port"));
+			requestLocalizedString(L"/Plugins/OWO/Settings/Labels/Port") + L" ");
 		m_port_text_block = CreateTextBlock(std::to_wstring(m_net_port));
 
 		m_ip_label_text_block->IsPrimary(false);
@@ -326,8 +326,8 @@ public:
 
 				m_ip_label_text_block->Text(
 					_addr_vector.size() > 1
-						? requestLocalizedString(L"/Plugins/OWO/Settings/Labels/LocalIP/Multiple")
-						: requestLocalizedString(L"/Plugins/OWO/Settings/Labels/LocalIP/One"));
+						? (requestLocalizedString(L"/Plugins/OWO/Settings/Labels/LocalIP/Multiple") + L" ")
+						: (requestLocalizedString(L"/Plugins/OWO/Settings/Labels/LocalIP/One") + L" "));
 
 				m_ip_text_block->Text(StringToWString(_addr_str));
 			}
