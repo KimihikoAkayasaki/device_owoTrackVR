@@ -44,8 +44,8 @@ UDPDeviceQuatServer::UDPDeviceQuatServer(uint32_t* portno_v) : NetworkedDeviceQu
 }
 
 
-void UDPDeviceQuatServer::startListening() {
-	Socket.Bind(portno);
+void UDPDeviceQuatServer::startListening(bool& _ret) {
+	_ret = Socket.Bind(portno);
 }
 
 bool UDPDeviceQuatServer::more_data_exists__read() {

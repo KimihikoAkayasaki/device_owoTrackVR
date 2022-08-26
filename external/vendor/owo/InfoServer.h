@@ -4,7 +4,7 @@
 #include <vector>
 
 class InfoServer {
-private:
+
 	uint32_t INFO_PORT = 35903;
 	uint32_t port_no = 6969;
 
@@ -18,7 +18,7 @@ private:
 	bool respond_to_all_requests();
 
 public:
-	InfoServer();
+	InfoServer(bool& _ret);
 
 	void add_tracker();
 	void tick();

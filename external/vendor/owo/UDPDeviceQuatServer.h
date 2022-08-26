@@ -32,7 +32,7 @@ private:
 public:
 	UDPDeviceQuatServer(uint32_t* portno_v);
 
-	void startListening();
+	void startListening(bool& _ret);
 	void tick();
 
 	bool isConnectionAlive();

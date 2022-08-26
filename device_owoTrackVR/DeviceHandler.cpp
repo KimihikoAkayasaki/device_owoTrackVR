@@ -30,6 +30,7 @@ std::wstring DeviceHandler::statusResultWString(HRESULT stat)
 		case R_E_CONNECTION_DEAD: return requestLocalizedString(L"/Plugins/OWO/Statuses/ConnectionDead");
 		case R_E_NO_DATA: return requestLocalizedString(L"/Plugins/OWO/Statuses/NoData");
 		case R_E_INIT_FAILED: return requestLocalizedString(L"/Plugins/OWO/Statuses/InitFailure");
+		case R_E_PORTS_TAKEN: return requestLocalizedString(L"/Plugins/OWO/Statuses/NoPorts");
 		case R_E_NOT_STARTED: return requestLocalizedString(L"/Plugins/OWO/Statuses/NotStarted");
 		case S_FALSE:
 		default: return L"Undefined: " + std::to_wstring(stat) +
@@ -43,7 +44,6 @@ std::wstring DeviceHandler::statusResultWString(HRESULT stat)
 void DeviceHandler::initialize()
 {
 	// Initialize your device here
-	settingsSupported = true;
 	trackedJoints.clear();
 	trackedJoints.push_back(ktvr::K2TrackedJoint("Default"));
 
@@ -53,7 +53,20 @@ void DeviceHandler::initialize()
 	{
 		// Construct the networking server
 		m_data_server = new UDPDeviceQuatServer(&m_net_port);
-		m_info_server = new InfoServer();
+
+		bool _return = false;
+		m_info_server = new InfoServer(_return);
+
+		if (!_return)
+		{
+			LOG(ERROR) << "OWO Device Error: Failed to bind ports!";
+			m_status_result = R_E_PORTS_TAKEN;
+
+			if (hasBeenLoaded)
+				m_message_text_block->Text(requestLocalizedString(L"/Plugins/OWO/Notices/NoPorts"));
+
+			return; // Give up
+		}
 
 		m_info_server->set_port_no(m_data_server->get_port());
 		m_info_server->add_tracker();
@@ -61,7 +74,19 @@ void DeviceHandler::initialize()
 		// Start listening
 		try
 		{
-			m_data_server->startListening();
+			m_data_server->startListening(_return);
+
+			if (!_return)
+			{
+				LOG(ERROR) << "OWO Device Error: Failed to bind ports!";
+				m_status_result = R_E_PORTS_TAKEN;
+
+				if (hasBeenLoaded)
+					m_message_text_block->Text(requestLocalizedString(L"/Plugins/OWO/Notices/NoPorts"));
+
+				return; // Give up
+			}
+
 			m_status_result = R_E_CONNECTION_DEAD;
 		}
 		catch (std::system_error& e)
@@ -71,16 +96,16 @@ void DeviceHandler::initialize()
 			m_status_result = R_E_INIT_FAILED;
 
 			if (hasBeenLoaded)
-			{
 				m_message_text_block->Text(requestLocalizedString(L"/Plugins/OWO/Notices/Failure"));
-			}
 		}
 	}
 
 	// Mark the device as initialized
-	if (m_status_result != R_E_INIT_FAILED)
+	if (m_status_result != R_E_INIT_FAILED &&
+		m_status_result != R_E_PORTS_TAKEN)
 	{
 		initialized = true; // Mark the device as initialized
+		settingsSupported = true; // Mark settings as supported
 
 		if (!m_update_server_thread)
 			m_update_server_thread.reset(new std::thread(&DeviceHandler::update_server_thread_worker, this));

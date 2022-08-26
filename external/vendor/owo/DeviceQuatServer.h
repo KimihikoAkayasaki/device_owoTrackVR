@@ -5,7 +5,7 @@
 
 class DeviceQuatServer {
 public:
-	virtual void startListening() = 0; // set up server
+	virtual void startListening(bool& _ret) = 0; // set up server
 	virtual void tick() = 0; // tick
 
 	virtual bool isDataAvailable() = 0; // true if new data is available

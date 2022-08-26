@@ -89,31 +89,23 @@ public:
 		return true;
 	}
 
-	void Bind(uint32_t* port)
+	bool Bind(uint32_t* port)
 	{
 		sockaddr_in add;
 		add.sin_family = AF_INET;
 		add.sin_addr.s_addr = htonl(INADDR_ANY);
 
-		for (uint32_t _port = *port; _port <= *port + 30; _port++)
-		{
-			add.sin_port = htons(_port);
-			int ret = bind(sock, reinterpret_cast<SOCKADDR*>(&add), sizeof(add));
+		add.sin_port = htons(*port);
+		int ret = bind(sock, reinterpret_cast<SOCKADDR*>(&add), sizeof(add));
 
-			if (ret < 0)
-			{
-				LOG(WARNING) << "OWO Device: Port " << *port << " is already taken, retrying with " << _port + 1;
-			}
-			else
-			{
-				LOG(INFO) << "Port bind successful at " << _port << ". Overriding this session defaults...";
-				*port = _port;
-				return; // Don't retry, we're good
-			}
+		if (ret < 0)
+		{
+			LOG(WARNING) << "OWO Device: Port " << *port << " is already taken, giving up!";
+			return false;
 		}
-		LOG(ERROR) << "OWO Device Error: Ports in range " << *port << "-" << *port + 30 <<
-			" are all already taken. Couldn't bind.";
-		throw std::system_error(WSAGetLastError(), std::system_category(), "Bind failed");
+
+		LOG(INFO) << "Port bind successful at " << *port << "!";
+		return true; // We're good
 	}
 
 	void Bind(unsigned short port)

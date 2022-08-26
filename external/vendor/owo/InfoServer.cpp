@@ -13,10 +13,10 @@ bool InfoServer::respond_to_all_requests()
 	}
 }
 
-InfoServer::InfoServer()
+InfoServer::InfoServer(bool& _ret)
 {
 	buff = (char*)malloc(MAX_BUFF_SIZE);
-	Socket.Bind(&INFO_PORT);
+	_ret = Socket.Bind(&INFO_PORT);
 }
 
 void InfoServer::add_tracker()

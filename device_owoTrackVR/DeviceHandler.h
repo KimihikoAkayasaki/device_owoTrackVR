@@ -27,6 +27,7 @@
 #define R_E_CONNECTION_DEAD 0x83010001 // No connection
 #define R_E_NO_DATA 0x83010002   // No data received
 #define R_E_INIT_FAILED 0x83010003   // Init failed
+#define R_E_PORTS_TAKEN 0x83010004   // Ports taken
 
 #define R_E_NOT_STARTED 0x83010005 // Disconnected (initial)
 
