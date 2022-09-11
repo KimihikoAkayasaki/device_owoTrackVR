@@ -351,7 +351,7 @@ public:
 	void save_settings()
 	{
 		if (std::ofstream output(
-				ktvr::GetK2AppDataFileDir("Device_OWO_settings.xml"));
+				ktvr::GetK2AppDataFileDir(L"Device_OWO_settings.xml"));
 			output.fail())
 		{
 			LOG(ERROR) << "OWO Device Error: Couldn't save settings!\n";
@@ -382,7 +382,7 @@ public:
 	void load_settings()
 	{
 		if (std::ifstream input(
-				ktvr::GetK2AppDataFileDir("Device_OWO_settings.xml"));
+				ktvr::GetK2AppDataFileDir(L"Device_OWO_settings.xml"));
 			input.fail())
 		{
 			LOG(WARNING) << "OWO Device Error: Couldn't read settings, re-generating!\n";
