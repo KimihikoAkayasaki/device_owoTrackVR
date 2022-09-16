@@ -60,17 +60,15 @@ public:
 	DeviceHandler()
 	{
 		LOG(INFO) << "Constructing the OWO Handler for JointsBasis K2TrackingDevice...";
-
-		deviceType = ktvr::K2_Joints;
-		deviceName = "owoTrackVR";
+		
+		deviceName = L"owoTrackVR";
 		settingsSupported = false; // Not yet, but soonTM
 
 		load_settings(); // Load settings
 	}
 
 	~DeviceHandler() override
-	{
-	}
+	= default;
 
 	bool hasBeenLoaded = false,
 	     calibrationPending = false;
@@ -420,17 +418,17 @@ public:
 	Eigen::Quaterniond m_global_rotation{1, 0, 0, 0},
 	                   m_local_rotation{1, 0, 0, 0};
 
-	// TODO NOT BACKED UP \/
+	// TODO NOT IN SETTINGS \/
 
 	// OWO Position predict (should be ditched for the Kalman filter?)
 	bool m_should_predict_position_tracker_wise = false;
 	double m_position_prediction_strength_tracker_wise = 1.0;
 
+	// TODO NOT IN SETTINGS /\
+
 	// OWO Interfacing Port
 	uint32_t m_net_port = 6969;
 
-	// TODO NOT BACKED UP /\
-	
 	// OWO Interfacing is_calibrating
 	bool m_is_calibrating_forward = false,
 	     m_is_calibrating_down = false;

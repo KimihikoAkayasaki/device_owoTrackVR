@@ -45,7 +45,7 @@ void DeviceHandler::initialize()
 {
 	// Initialize your device here
 	trackedJoints.clear();
-	trackedJoints.push_back(ktvr::K2TrackedJoint("Default"));
+	trackedJoints.push_back(ktvr::K2TrackedJoint(L"OWOVR-01"));
 
 	// Optionally initialize the server
 	// (Warning: this can be done only once)
@@ -219,7 +219,7 @@ void DeviceHandler::calculatePose()
 	// Angular velocity is not used as of now
 	// double* gyro = m_data_server->getGyroscope();
 
-	auto final_tracker_basis = Basis(p_remote_quaternion);
+	const auto final_tracker_basis = Basis(p_remote_quaternion);
 
 	for (int i = 0; i < 3; i++)
 	{
@@ -231,7 +231,7 @@ void DeviceHandler::calculatePose()
 	if (!m_is_calibrating_forward && m_should_predict_position_tracker_wise)
 	{
 		auto b = Basis(p_remote_quaternion);
-		Vector3 result = m_pos_predictor.predict(*m_data_server, b) *
+		const Vector3 result = m_pos_predictor.predict(*m_data_server, b) *
 			m_position_prediction_strength_tracker_wise;
 
 		m_pose.first(0) += result.x;

@@ -8,18 +8,18 @@ inline double minimize_val(double v) {
 }
 
 inline Vector3 minimize_vector(Vector3 v) {
-	return Vector3(
+	return {
 		minimize_val(v.x),
 		minimize_val(v.y),
 		minimize_val(v.z)
-	);
+	};
 }
 
 
 
 Vector3 PositionPredictor::predict(DeviceQuatServer& serv, Basis& basis){
-	double *gyro_a = serv.getGyroscope();
-	double *accel_a = serv.getAccel();
+	const double *gyro_a = serv.getGyroscope();
+	const double *accel_a = serv.getAccel();
 	gyro = gyro.lerp(Vector3(gyro_a[0], gyro_a[1], gyro_a[2]), 0.1);
 	acceleration = acceleration.lerp(Vector3(accel_a[0], accel_a[1], accel_a[2]), 0.4);
 

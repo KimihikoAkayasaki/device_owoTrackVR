@@ -63,7 +63,7 @@ namespace bb {
 		// Basic Searching (Linear)
 		template<typename T> int32_t find(T key, uint32_t start = 0) {
 			int32_t ret = -1;
-			uint32_t len = buf.size();
+			const uint32_t len = buf.size();
 			for (uint32_t i = start; i < len; i++) {
 				T data = read<T>(i);
 				// Wasn't actually found, bounds of buffer were exceeded
@@ -172,7 +172,7 @@ namespace bb {
 		}
 
 		template<typename T> void append(T data) {
-			uint32_t s = sizeof(data);
+			const uint32_t s = sizeof(data);
 
 			if (size() < (wpos + s))
 				buf.resize(wpos + s);

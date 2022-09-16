@@ -44,16 +44,16 @@ Vector3 Vector3::snapped(Vector3 p_val) const {
 
 Vector3 Vector3::cubic_interpolaten(const Vector3& p_b, const Vector3& p_pre_a, const Vector3& p_post_b, double p_t) const {
 	Vector3 p0 = p_pre_a;
-	Vector3 p1 = *this;
-	Vector3 p2 = p_b;
+	const Vector3 p1 = *this;
+	const Vector3 p2 = p_b;
 	Vector3 p3 = p_post_b;
 
 	{
 		//normalize
 
-		double ab = p0.distance_to(p1);
-		double bc = p1.distance_to(p2);
-		double cd = p2.distance_to(p3);
+		const double ab = p0.distance_to(p1);
+		const double bc = p1.distance_to(p2);
+		const double cd = p2.distance_to(p3);
 
 		if (ab > 0) {
 			p0 = p1 + (p0 - p1) * (bc / ab);
@@ -63,9 +63,9 @@ Vector3 Vector3::cubic_interpolaten(const Vector3& p_b, const Vector3& p_pre_a, 
 		}
 	}
 
-	double t = p_t;
-	double t2 = t * t;
-	double t3 = t2 * t;
+	const double t = p_t;
+	const double t2 = t * t;
+	const double t3 = t2 * t;
 
 	Vector3 out;
 	out = 0.5 * ((p1 * 2.0) +
@@ -76,14 +76,14 @@ Vector3 Vector3::cubic_interpolaten(const Vector3& p_b, const Vector3& p_pre_a, 
 }
 
 Vector3 Vector3::cubic_interpolate(const Vector3& p_b, const Vector3& p_pre_a, const Vector3& p_post_b, double p_t) const {
-	Vector3 p0 = p_pre_a;
-	Vector3 p1 = *this;
-	Vector3 p2 = p_b;
-	Vector3 p3 = p_post_b;
+	const Vector3 p0 = p_pre_a;
+	const Vector3 p1 = *this;
+	const Vector3 p2 = p_b;
+	const Vector3 p3 = p_post_b;
 
-	double t = p_t;
-	double t2 = t * t;
-	double t3 = t2 * t;
+	const double t = p_t;
+	const double t2 = t * t;
+	const double t3 = t2 * t;
 
 	Vector3 out;
 	out = 0.5 * ((p1 * 2.0) +
@@ -94,24 +94,26 @@ Vector3 Vector3::cubic_interpolate(const Vector3& p_b, const Vector3& p_pre_a, c
 }
 
 Vector3 Vector3::move_toward(const Vector3& p_to, const double p_delta) const {
-	Vector3 v = *this;
-	Vector3 vd = p_to - v;
-	double len = vd.length();
+	const Vector3 v = *this;
+	const Vector3 vd = p_to - v;
+	const double len = vd.length();
 	return len <= p_delta || len < UNIT_EPSILON ? p_to : v + vd / len * p_delta;
 }
 
 Basis Vector3::outer(const Vector3& p_b) const {
-	Vector3 row0(x * p_b.x, x * p_b.y, x * p_b.z);
-	Vector3 row1(y * p_b.x, y * p_b.y, y * p_b.z);
-	Vector3 row2(z * p_b.x, z * p_b.y, z * p_b.z);
+	const Vector3 row0(x * p_b.x, x * p_b.y, x * p_b.z);
+	const Vector3 row1(y * p_b.x, y * p_b.y, y * p_b.z);
+	const Vector3 row2(z * p_b.x, z * p_b.y, z * p_b.z);
 
 	return Basis(row0, row1, row2);
 }
 
 Basis Vector3::to_diagonal_matrix() const {
-	return Basis(x, 0, 0,
+	return {
+		x, 0, 0,
 		0, y, 0,
-		0, 0, z);
+		0, 0, z
+	};
 }
 
 bool Vector3::is_equal_approx(const Vector3& p_v) const {

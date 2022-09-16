@@ -44,86 +44,128 @@
 // Generic swap template.
 #ifndef SWAP
 #define SWAP(m_x, m_y) __swap_tmpl((m_x), (m_y))
+
 template <class T>
-inline void __swap_tmpl(T& x, T& y) {
+void __swap_tmpl(T& x, T& y)
+{
 	T aux = x;
 	x = y;
 	y = aux;
 }
 #endif // SWAP
 
-namespace Math {
-	inline double fposmod(double p_x, double p_y) {
+namespace Math
+{
+	inline double fposmod(double p_x, double p_y)
+	{
 		return (p_x >= 0) ? std::fmod(p_x, p_y) : p_y - std::fmod(-p_x, p_y);
 	}
 
 
-	inline bool is_equal_approx(double a, double b) {
+	inline bool is_equal_approx(double a, double b)
+	{
 		// Check for exact equality first, required to handle "infinity" values.
-		if (a == b) {
+		if (a == b)
+		{
 			return true;
 		}
 		// Then check for approximate equality.
 		double tolerance = UNIT_EPSILON * abs(a);
-		if (tolerance < UNIT_EPSILON) {
+		if (tolerance < UNIT_EPSILON)
+		{
 			tolerance = UNIT_EPSILON;
 		}
 		return abs(a - b) < tolerance;
 	}
 
-	inline bool is_equal_approx(double a, double b, double eps) {
+	inline bool is_equal_approx(double a, double b, double eps)
+	{
 		// Check for exact equality first, required to handle "infinity" values.
-		if (a == b) {
+		if (a == b)
+		{
 			return true;
 		}
 		// Then check for approximate equality.
 		return abs(a - b) < eps;
 	}
 
-	inline bool is_zero_approx(double a){
+	inline bool is_zero_approx(double a)
+	{
 		return (is_equal_approx(a, 0.));
 	}
 
 
+	static inline double lerp(double p_from, double p_to, double p_weight)
+	{
+		return p_from + (p_to - p_from) * p_weight;
+	}
 
-	static inline double lerp(double p_from, double p_to, double p_weight) { return p_from + (p_to - p_from) * p_weight; }
 	static inline float lerp(float p_from, float p_to, float p_weight) { return p_from + (p_to - p_from) * p_weight; }
 
-	static inline double lerp_angle(double p_from, double p_to, double p_weight) {
-		double difference = fmod(p_to - p_from, Math_TAU);
-		double distance = fmod(2.0 * difference, Math_TAU) - difference;
-		return p_from + distance * p_weight;
-	}
-	static inline float lerp_angle(float p_from, float p_to, float p_weight) {
-		float difference = fmod(p_to - p_from, (float)Math_TAU);
-		float distance = fmod(2.0f * difference, (float)Math_TAU) - difference;
+	static inline double lerp_angle(double p_from, double p_to, double p_weight)
+	{
+		const double difference = fmod(p_to - p_from, Math_TAU);
+		const double distance = fmod(2.0 * difference, Math_TAU) - difference;
 		return p_from + distance * p_weight;
 	}
 
-	static inline double inverse_lerp(double p_from, double p_to, double p_value) { return (p_value - p_from) / (p_to - p_from); }
-	static inline float inverse_lerp(float p_from, float p_to, float p_value) { return (p_value - p_from) / (p_to - p_from); }
+	static inline float lerp_angle(float p_from, float p_to, float p_weight)
+	{
+		const float difference = fmod(p_to - p_from, static_cast<float>(Math_TAU));
+		const float distance = fmod(2.0f * difference, static_cast<float>(Math_TAU)) - difference;
+		return p_from + distance * p_weight;
+	}
 
-	static inline double range_lerp(double p_value, double p_istart, double p_istop, double p_ostart, double p_ostop) { return Math::lerp(p_ostart, p_ostop, Math::inverse_lerp(p_istart, p_istop, p_value)); }
-	static inline float range_lerp(float p_value, float p_istart, float p_istop, float p_ostart, float p_ostop) { return Math::lerp(p_ostart, p_ostop, Math::inverse_lerp(p_istart, p_istop, p_value)); }
+	static inline double inverse_lerp(double p_from, double p_to, double p_value)
+	{
+		return (p_value - p_from) / (p_to - p_from);
+	}
 
-	static inline double smoothstep(double p_from, double p_to, double p_s) {
-		if (is_equal_approx(p_from, p_to)) {
+	static inline float inverse_lerp(float p_from, float p_to, float p_value)
+	{
+		return (p_value - p_from) / (p_to - p_from);
+	}
+
+	static inline double range_lerp(double p_value, double p_istart, double p_istop, double p_ostart, double p_ostop)
+	{
+		return
+			lerp(p_ostart, p_ostop, inverse_lerp(p_istart, p_istop, p_value));
+	}
+
+	static inline float range_lerp(float p_value, float p_istart, float p_istop, float p_ostart, float p_ostop)
+	{
+		return
+			lerp(p_ostart, p_ostop, inverse_lerp(p_istart, p_istop, p_value));
+	}
+
+	static inline double smoothstep(double p_from, double p_to, double p_s)
+	{
+		if (is_equal_approx(p_from, p_to))
+		{
 			return p_from;
 		}
-		double s = CLAMP((p_s - p_from) / (p_to - p_from), 0.0, 1.0);
+		const double s = CLAMP((p_s - p_from) / (p_to - p_from), 0.0, 1.0);
 		return s * s * (3.0 - 2.0 * s);
 	}
-	static inline float smoothstep(float p_from, float p_to, float p_s) {
-		if (is_equal_approx(p_from, p_to)) {
+
+	static inline float smoothstep(float p_from, float p_to, float p_s)
+	{
+		if (is_equal_approx(p_from, p_to))
+		{
 			return p_from;
 		}
-		float s = CLAMP((p_s - p_from) / (p_to - p_from), 0.0f, 1.0f);
+		const float s = CLAMP((p_s - p_from) / (p_to - p_from), 0.0f, 1.0f);
 		return s * s * (3.0f - 2.0f * s);
 	}
 
 
-	inline int sign(double a) {
+	inline int sign(double a)
+	{
 		return (a > 0) ? 1 : -1;
 	}
 
+	inline double sign_d(double a)
+	{
+		return (a > 0) ? 1 : -1;
+	}
 };

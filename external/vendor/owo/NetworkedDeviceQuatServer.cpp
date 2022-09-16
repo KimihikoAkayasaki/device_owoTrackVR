@@ -13,12 +13,12 @@ bool NetworkedDeviceQuatServer::receive_packet_id(message_id_t new_id) {
 void NetworkedDeviceQuatServer::handle_doubles_packet(unsigned char* packet, double* into, int num_doubles) {
 	packet += sizeof(message_header_type_t);
 
-	message_id_t id = convert_chars<message_id_t>(packet);
+	const message_id_t id = convert_chars<message_id_t>(packet);
 	packet += sizeof(message_id_t);
 	if (!receive_packet_id(id)) return;
 
 	for (int i = 0; i < num_doubles; i++) {
-		sensor_data_t data = convert_chars<sensor_data_t>(packet);
+		const sensor_data_t data = convert_chars<sensor_data_t>(packet);
 		packet += sizeof(sensor_data_t);
 		into[i] = (double)data;
 	}
@@ -39,7 +39,7 @@ void NetworkedDeviceQuatServer::handle_accel_packet(unsigned char* packet){
 
 
 bool NetworkedDeviceQuatServer::isDataAvailable() {
-	bool was_available = isNewDataAvailable;
+	const bool was_available = isNewDataAvailable;
 	isNewDataAvailable = false;
 	return was_available;
 }
@@ -65,7 +65,7 @@ NetworkedDeviceQuatServer::NetworkedDeviceQuatServer(){
 
 	buff_hello = (char*)malloc(sizeof(HELLOMESSAGE));
 
-	auto msg = HELLOMESSAGE;
+	const auto msg = HELLOMESSAGE;
 	for (int i = 0; i < sizeof(HELLOMESSAGE); i++) {
 		buff_hello[i] = msg[i];
 	}

@@ -4,7 +4,7 @@
 bool InfoServer::respond_to_all_requests()
 {
 	sockaddr_in addr;
-	bool is_recv = Socket.RecvFrom(buff, MAX_BUFF_SIZE, reinterpret_cast<SOCKADDR*>(&addr));
+	const bool is_recv = Socket.RecvFrom(buff, MAX_BUFF_SIZE, reinterpret_cast<SOCKADDR*>(&addr));
 	if (!is_recv) return false;
 
 	if (strcmp(buff, "DISCOVERY\0") == 0)

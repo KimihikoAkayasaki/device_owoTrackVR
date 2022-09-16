@@ -17,7 +17,7 @@ class WSASession
 public:
 	WSASession()
 	{
-		int ret = WSAStartup(MAKEWORD(2, 2), &data);
+		const int ret = WSAStartup(MAKEWORD(2, 2), &data);
 		if (ret != 0)
 			throw std::system_error(WSAGetLastError(), std::system_category(), "WSAStartup Failed");
 	}
@@ -56,14 +56,14 @@ public:
 		add.sin_family = AF_INET;
 		add.sin_addr.s_addr = inet_addr(address.c_str());
 		add.sin_port = htons(port);
-		int ret = sendto(sock, buffer, len, flags, reinterpret_cast<SOCKADDR*>(&add), sizeof(add));
+		const int ret = sendto(sock, buffer, len, flags, reinterpret_cast<SOCKADDR*>(&add), sizeof(add));
 		if (ret < 0)
 			throw std::system_error(WSAGetLastError(), std::system_category(), "sendto failed");
 	}
 
 	void SendTo(sockaddr_in& address, const char* buffer, int len, int flags = 0)
 	{
-		int ret = sendto(sock, buffer, len, flags, reinterpret_cast<SOCKADDR*>(&address), sizeof(address));
+		const int ret = sendto(sock, buffer, len, flags, reinterpret_cast<SOCKADDR*>(&address), sizeof(address));
 		if (ret < 0)
 			throw std::system_error(WSAGetLastError(), std::system_category(), "sendto failed");
 	}
@@ -71,12 +71,12 @@ public:
 	bool RecvFrom(char* buffer, int len, SOCKADDR* from, int flags = 0)
 	{
 		int size = sizeof(sockaddr_in); // reinterpret_cast<SOCKADDR*>(&from)
-		int ret = recvfrom(sock, buffer, len, flags, from, &size);
+		const int ret = recvfrom(sock, buffer, len, flags, from, &size);
 		if (ret == WSAEWOULDBLOCK)
 			return false;
 		else if (ret < 0)
 		{
-			int err = WSAGetLastError();
+			const int err = WSAGetLastError();
 			if (err == WSAEWOULDBLOCK)
 			{
 				return false;
@@ -96,7 +96,7 @@ public:
 		add.sin_addr.s_addr = htonl(INADDR_ANY);
 
 		add.sin_port = htons(*port);
-		int ret = bind(sock, reinterpret_cast<SOCKADDR*>(&add), sizeof(add));
+		const int ret = bind(sock, reinterpret_cast<SOCKADDR*>(&add), sizeof(add));
 
 		if (ret < 0)
 		{
@@ -115,7 +115,7 @@ public:
 		add.sin_addr.s_addr = htonl(INADDR_ANY);
 		add.sin_port = htons(port);
 
-		int ret = bind(sock, reinterpret_cast<SOCKADDR*>(&add), sizeof(add));
+		const int ret = bind(sock, reinterpret_cast<SOCKADDR*>(&add), sizeof(add));
 		if (ret < 0)
 			throw std::system_error(WSAGetLastError(), std::system_category(), "Bind failed");
 	}

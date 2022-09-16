@@ -118,7 +118,7 @@ namespace bb {
 			return false;
 
 		// Compare byte by byte
-		uint32_t len = size();
+		const uint32_t len = size();
 		for (uint32_t i = 0; i < len; i++) {
 			if ((uint8_t)get(i) != (uint8_t)other->get(i))
 				return false;
@@ -161,9 +161,9 @@ namespace bb {
 	 * @param firstOccuranceOnly If true, only replace the first occurance of the key. If false, replace all occurances. False by default
 	 */
 	void ByteBuffer::replace(uint8_t key, uint8_t rep, uint32_t start, bool firstOccuranceOnly) {
-		uint32_t len = buf.size();
+		const uint32_t len = buf.size();
 		for (uint32_t i = start; i < len; i++) {
-			uint8_t data = read<uint8_t>(i);
+			const uint8_t data = read<uint8_t>(i);
 			// Wasn't actually found, bounds of buffer were exceeded
 			if ((key != 0) && (data == 0))
 				break;
@@ -248,7 +248,7 @@ namespace bb {
 	// Write Functions
 
 	void ByteBuffer::put(ByteBuffer* src) {
-		uint32_t len = src->size();
+		const uint32_t len = src->size();
 		for (uint32_t i = 0; i < len; i++)
 			append<uint8_t>(src->get(i));
 	}
@@ -333,12 +333,12 @@ namespace bb {
 	}
 
 	void ByteBuffer::printInfo() {
-		uint32_t length = buf.size();
+		const uint32_t length = buf.size();
 		std::cout << "ByteBuffer " << name.c_str() << " Length: " << length << ". Info Print" << std::endl;
 	}
 
 	void ByteBuffer::printAH() {
-		uint32_t length = buf.size();
+		const uint32_t length = buf.size();
 		std::cout << "ByteBuffer " << name.c_str() << " Length: " << length << ". ASCII & Hex Print" << std::endl;
 
 		for (uint32_t i = 0; i < length; i++) {
@@ -354,7 +354,7 @@ namespace bb {
 	}
 
 	void ByteBuffer::printAscii() {
-		uint32_t length = buf.size();
+		const uint32_t length = buf.size();
 		std::cout << "ByteBuffer " << name.c_str() << " Length: " << length << ". ASCII Print" << std::endl;
 
 		for (uint32_t i = 0; i < length; i++) {
@@ -365,7 +365,7 @@ namespace bb {
 	}
 
 	void ByteBuffer::printHex() {
-		uint32_t length = buf.size();
+		const uint32_t length = buf.size();
 		std::cout << "ByteBuffer " << name.c_str() << " Length: " << length << ". Hex Print" << std::endl;
 
 		for (uint32_t i = 0; i < length; i++) {
@@ -376,7 +376,7 @@ namespace bb {
 	}
 
 	void ByteBuffer::printPosition() {
-		uint32_t length = buf.size();
+		const uint32_t length = buf.size();
 		std::cout << "ByteBuffer " << name.c_str() << " Length: " << length << " Read Pos: " << rpos << ". Write Pos: "
 			<< wpos << std::endl;
 	}
