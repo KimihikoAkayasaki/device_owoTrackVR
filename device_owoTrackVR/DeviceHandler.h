@@ -67,8 +67,13 @@ public:
 		load_settings(); // Load settings
 	}
 
-	~DeviceHandler() override
-	= default;
+	std::wstring getDeviceGUID() override
+	{
+		// This ID is unique to the official owo plugin!
+		return L"K2VRTEAM-VEND-API1-DVCE-DVCEOWOTRACK";
+	}
+
+	~DeviceHandler() override = default;
 
 	bool hasBeenLoaded = false,
 	     calibrationPending = false;
