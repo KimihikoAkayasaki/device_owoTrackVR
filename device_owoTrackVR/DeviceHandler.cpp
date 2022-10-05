@@ -105,7 +105,7 @@ void DeviceHandler::initialize()
 		m_status_result != R_E_PORTS_TAKEN)
 	{
 		initialized = true; // Mark the device as initialized
-		settingsSupported = true; // Mark settings as supported
+		Flags_SettingsSupported = true; // Mark settings as supported
 
 		if (!m_update_server_thread)
 			m_update_server_thread.reset(new std::thread(&DeviceHandler::update_server_thread_worker, this));
@@ -166,7 +166,7 @@ void DeviceHandler::calculatePose()
 	Vector3 offset_local_tracker = m_tracker_offset;
 	m_pose.first = getHMDPoseCalibrated().first; // Zero the position vector
 
-	Eigen::Matrix3f rotation = getHMDPoseCalibrated().second.toRotationMatrix();
+	Eigen::Matrix3d rotation = getHMDPoseCalibrated().second.toRotationMatrix();
 	offset_basis.set(
 		rotation(0, 0),
 		rotation(0, 1),
@@ -214,7 +214,7 @@ void DeviceHandler::calculatePose()
 			Quat(Vector3(0, 1, 0), -getHMDOrientationYawCalibrated())).to_eigen<double>();
 
 	p_remote_quaternion = p_remote_quaternion * Quat(m_local_rotation);
-	m_pose.second = p_remote_quaternion.to_eigen<float>();
+	m_pose.second = p_remote_quaternion.to_eigen<double>();
 
 	// Angular velocity is not used as of now
 	// double* gyro = m_data_server->getGyroscope();

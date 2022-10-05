@@ -3,11 +3,13 @@
 
 #define MINIMI_RES 0.12
 
-inline double minimize_val(double v) {
+inline double minimize_val(double v)
+{
 	return (abs(v) < MINIMI_RES) ? 0 : v - MINIMI_RES;
 }
 
-inline Vector3 minimize_vector(Vector3 v) {
+inline Vector3 minimize_vector(Vector3 v)
+{
 	return {
 		minimize_val(v.x),
 		minimize_val(v.y),
@@ -16,10 +18,10 @@ inline Vector3 minimize_vector(Vector3 v) {
 }
 
 
-
-Vector3 PositionPredictor::predict(DeviceQuatServer& serv, Basis& basis){
-	const double *gyro_a = serv.getGyroscope();
-	const double *accel_a = serv.getAccel();
+Vector3 PositionPredictor::predict(DeviceQuatServer& serv, Basis& basis)
+{
+	const double* gyro_a = serv.getGyroscope();
+	const double* accel_a = serv.getAccel();
 	gyro = gyro.lerp(Vector3(gyro_a[0], gyro_a[1], gyro_a[2]), 0.1);
 	acceleration = acceleration.lerp(Vector3(accel_a[0], accel_a[1], accel_a[2]), 0.4);
 

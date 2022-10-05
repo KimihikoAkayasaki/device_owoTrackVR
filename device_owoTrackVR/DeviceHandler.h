@@ -62,13 +62,18 @@ public:
 		LOG(INFO) << "Constructing the OWO Handler for JointsBasis K2TrackingDevice...";
 		
 		deviceName = L"owoTrackVR";
-		settingsSupported = false; // Not yet, but soonTM
+		Flags_SettingsSupported = false; // Not yet, but soonTM
 
 		load_settings(); // Load settings
 	}
 
-	~DeviceHandler() override
-	= default;
+	std::wstring getDeviceGUID() override
+	{
+		// This ID is unique to the official owo plugin!
+		return L"K2VRTEAM-VEND-API1-DVCE-DVCEOWOTRACK";
+	}
+
+	~DeviceHandler() override = default;
 
 	bool hasBeenLoaded = false,
 	     calibrationPending = false;
@@ -450,9 +455,9 @@ public:
 	HRESULT m_status_result = R_E_NOT_STARTED;
 
 	void calculatePose(); // Implemented in .cpp
-	std::pair<Eigen::Vector3f, Eigen::Quaternionf> m_pose
+	std::pair<Eigen::Vector3d, Eigen::Quaterniond> m_pose
 	{
-		Eigen::Vector3f(0, 0, 0), Eigen::Quaternionf(1, 0, 0, 0)
+		Eigen::Vector3d(0, 0, 0), Eigen::Quaterniond(1, 0, 0, 0)
 	};
 
 	std::unique_ptr<std::thread> m_update_server_thread;
