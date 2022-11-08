@@ -129,7 +129,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_WINSOCK_DEPRECATED_NO_WARNINGS;NOGDI;_CRT_SECURE_NO_WARNINGS;_DEBUG;DEVICEOWOTRACKVR_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>EIGEN_DONT_ALIGN_STATICALLY;_WINSOCK_DEPRECATED_NO_WARNINGS;NOGDI;_CRT_SECURE_NO_WARNINGS;_DEBUG;DEVICEOWOTRACKVR_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -159,7 +159,7 @@ xcopy /y /d "$(SolutionDir)$(Platform)\$(Configuration)\glog*.dll" "$(SolutionDi
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_WINSOCK_DEPRECATED_NO_WARNINGS;NOGDI;_CRT_SECURE_NO_WARNINGS;NDEBUG;DEVICEOWOTRACKVR_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>EIGEN_DONT_ALIGN_STATICALLY;_WINSOCK_DEPRECATED_NO_WARNINGS;NOGDI;_CRT_SECURE_NO_WARNINGS;NDEBUG;DEVICEOWOTRACKVR_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
